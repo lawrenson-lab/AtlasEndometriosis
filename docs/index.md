@@ -1,7 +1,7 @@
 ---
 title: "Home"
-author: "Kate Lawrenson, Marcos A. S. Fonseca, Felipe Segato, et. al."
-date: "November, 2019" 
+author: "Marcos A. S. Fonseca"
+date: "May, 2021" 
 output: 
   html_document:
     smart: false
@@ -19,9 +19,6 @@ navbar:
       href: tf-analysis.html
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ### Introduction
 This document contains workflows, explaining how to perform all analysis described in `A cellular and molecular atlas of human endometriosis reveals disease heterogeneity and remodeling of the microenvironment`.
