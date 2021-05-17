@@ -11,7 +11,7 @@
 
 
 
-<title>Mesothelial cells analysis</title>
+<title>Fibroblasts</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -292,7 +292,7 @@ $(document).ready(function () {
   <a href="en-epi.html">Endometrial-type Epithelial analysis</a>
 </li>
 <li>
-  <a href="meso-epi.html">Mesothelial Epithelial analysis</a>
+  <a href="meso-epi.html">Mesothelial cells analysis</a>
 </li>
 <li>
   <a href="Fibroblasts.html">Fibroblasts analysis</a>
@@ -309,36 +309,26 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Mesothelial cells analysis</h1>
+<h1 class="title toc-ignore">Fibroblasts</h1>
 
 </div>
 
 
-<div id="parent-epithelial-cell-clusters" class="section level2">
-<h2>Parent Epithelial cell clusters</h2>
-<p>Selecting Mesothelial clusters</p>
-<pre class="r"><code>DimPlot(epi, reduction = &quot;umap&quot;)</code></pre>
-<p><img src="meso-epi_files/figure-html/unnamed-chunk-3-1.png" width="100%" /></p>
-<pre class="r"><code># Session A
-class = &quot;mesothelial.epi&quot;
-epi.sel = subset(epi, subset = seurat_clusters %in% c(&quot;Meso_1&quot;, &quot;Meso_2&quot;, &quot;Meso_3&quot;, &quot;Meso_4&quot;, &quot;Meso_5&quot;, &quot;Meso_6&quot;))
-epi.sel = subset(epi.sel, subset = Major.Class_2.0 %in% c(&quot;Endometrioma&quot;, &quot;Eutopic Endometrium&quot;, &quot;Extra-ovarian endometriosis&quot;))
-
-# # Session B
-# class = &quot;microenvironment.epi&quot;
-# epi.sel = subset(epi, subset = seurat_clusters %in% c(&quot;Meso_1&quot;, &quot;Meso_2&quot;, &quot;Meso_3&quot;, &quot;Meso_4&quot;, &quot;Meso_5&quot;, &quot;Meso_6&quot;))
-# epi.sel = subset(epi.sel, subset = Major.Class_2.0 %in% c(&quot;Endometrioma&quot;, &quot;Eutopic Endometrium&quot;, &quot;Extra-ovarian endometriosis&quot;))
-# table(epi.sel@meta.data$seurat_clusters)
-
-DimPlot(epi.sel, reduction = &quot;umap&quot;, label = TRUE)</code></pre>
-<p><img src="meso-epi_files/figure-html/unnamed-chunk-3-2.png" width="100%" /></p>
-<pre class="r"><code>Idents(object = epi.sel) &lt;- epi.sel@meta.data$Major.Class_2.0
-
-##
-DimPlot(epi.sel, reduction = &quot;umap&quot;, label = TRUE, split.by = &quot;Major.Class_2.0&quot;) +
-  ggtitle(paste0(&quot;Major Class updated &quot;, class))</code></pre>
-<p><img src="meso-epi_files/figure-html/unnamed-chunk-3-3.png" width="100%" /></p>
-<pre class="r"><code>prop.cells &lt;- data.frame(table(Idents(epi.sel)))
+<p>Load Fibroblasts cells as Seurat object</p>
+<pre class="r"><code>fibro = readRDS(&quot;rds/fibroblasts.cells.20.clusters.rds&quot;)
+levels(fibro@meta.data$seurat_clusters) &lt;- c(&quot;OvF_1&quot;, &quot;PerF_1&quot;, &quot;PerF_2&quot;, &quot;PerF_3&quot;, &quot;PerF_4&quot;, &quot;EnS_1&quot;, &quot;PerF_5&quot;, &quot;PerF_6&quot;,
+                                                                        &quot;PerF_7&quot;, &quot;PerF_8&quot;, &quot;PerF_9&quot;, &quot;EnS_2&quot;, &quot;EnS_3&quot;, &quot;EnS_4&quot;, &quot;PerF_10&quot;,
+                                                                        &quot;EnS_5&quot;, &quot;EnS_6&quot;, &quot;PerF_11&quot;, &quot;EnF_7&quot;, &quot;OvF_2&quot;
+)
+Idents(object = fibro) &lt;- fibro@meta.data$seurat_clusters</code></pre>
+<pre class="r"><code>DimPlot(fibro, reduction = &quot;umap&quot;, label = T)</code></pre>
+<pre><code>## Warning: Using `as.character()` on a quosure is deprecated as of rlang 0.3.0.
+## Please use `as_label()` or `as_name()` instead.
+## This warning is displayed once per session.</code></pre>
+<p><img src="fibroblasts_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<div id="section" class="section level2">
+<h2></h2>
+<pre class="r"><code>prop.cells &lt;- data.frame(table(Idents(fibro)))
 prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
 
 ggplot(prop.cells, aes(Var1, Freq)) +
@@ -348,36 +338,31 @@ ggplot(prop.cells, aes(Var1, Freq)) +
   theme(plot.title = element_text(hjust = 0.5),
         axis.text.x = element_text(angle = 45, hjust = 1),
         axis.title.x = element_blank()) +
-  labs(title=&quot;Number of cells in each class&quot;, x =&quot;Clusters&quot;, y = &quot;Number of Cells&quot;)</code></pre>
-<p><img src="meso-epi_files/figure-html/unnamed-chunk-3-4.png" width="100%" /> ##</p>
-<pre class="r"><code>epi.sel.DEG &lt;- FindAllMarkers(epi.sel, test.use = &quot;MAST&quot;, verbose = F)
-head(epi.sel.DEG)</code></pre>
-<pre><code>##                  p_val avg_logFC pct.1 pct.2     p_val_adj      cluster
-## SLPI     3.007779e-122 -1.579214 0.073 0.661 6.490787e-118 Endometrioma
-## S100A10  4.213218e-120 -1.208331 0.578 0.923 9.092125e-116 Endometrioma
-## RBP1     6.552902e-117  1.323455 0.760 0.343 1.414116e-112 Endometrioma
-## C11orf96 3.987061e-109  1.144945 0.608 0.094 8.604078e-105 Endometrioma
-## KRT8      1.002022e-99 -1.234456 0.137 0.663  2.162364e-95 Endometrioma
-## KRT19     8.356683e-98 -1.395976 0.203 0.712  1.803372e-93 Endometrioma
-##              gene
-## SLPI         SLPI
-## S100A10   S100A10
-## RBP1         RBP1
-## C11orf96 C11orf96
-## KRT8         KRT8
-## KRT19       KRT19</code></pre>
-<pre class="r"><code>DotPlot(epi.sel, features = unique(features.deg)) +
-  scale_colour_gradient2(low = &quot;#2166ac&quot;, mid = &quot;#f7f7f7&quot;, high = &quot;#b2182b&quot;) +
-  RotatedAxis() +
-  coord_flip()</code></pre>
-<pre><code>## Scale for &#39;colour&#39; is already present. Adding another scale for &#39;colour&#39;,
-## which will replace the existing scale.</code></pre>
-<p><img src="meso-epi_files/figure-html/unnamed-chunk-6-1.png" width="672" /> ##</p>
-<pre class="r"><code>res &lt;- compareCluster(gs.epi.sel, fun=&quot;enrichPathway&quot;)
-n = 7
-clusterProfiler::dotplot(res, showCategory=n, title=paste0(class, &quot;: top &quot;, n)) +
-  RotatedAxis()</code></pre>
-<p><img src="meso-epi_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+  labs(title=&quot;Number of cells in each cluster&quot;, x =&quot;Clusters&quot;, y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="fibroblasts_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>fibro@active.ident &lt;- factor(fibro@active.ident,
+                            levels=c(&quot;OvF_1&quot;, &quot;OvF_2&quot;, 
+                                     &quot;PerF_1&quot;, &quot;PerF_2&quot;, &quot;PerF_3&quot;, &quot;PerF_4&quot;, &quot;PerF_5&quot;, &quot;PerF_6&quot;, &quot;PerF_7&quot;, &quot;PerF_8&quot;, &quot;PerF_9&quot;, &quot;PerF_10&quot;, &quot;PerF_11&quot;,
+                                     &quot;EnS_1&quot;, &quot;EnS_2&quot;, &quot;EnS_3&quot;, &quot;EnS_4&quot;, &quot;EnS_5&quot;, &quot;EnS_6&quot;, &quot;EnS_7&quot;)
+)</code></pre>
+<pre class="r"><code># selected.features = c(&quot;MME&quot;, &quot;IFITM1&quot;, &quot;DCN&quot;, &quot;FAP&quot;, &quot;COL11A1&quot;, &quot;COL1A1&quot;, &quot;PDGFRA&quot;, &quot;PDGFRB&quot;, &quot;ACTA2&quot;, &quot;THY1&quot;, &quot;CD44&quot;, &quot;ESR1&quot;, &quot;PGR&quot;, &quot;HIF1A&quot;)
+# DotPlot(object = fibro, assay = &quot;RNA&quot;, features = selected.features) +
+#   theme(axis.text.x = element_text(angle = 90)) +
+#   coord_flip() +
+# scale_colour_gradient2(low = &quot;#2166ac&quot;, mid = &quot;#f7f7f7&quot;, high = &quot;#b2182b&quot;)</code></pre>
+</div>
+<div id="section-1" class="section level2">
+<h2></h2>
+<pre class="r"><code>fibro.markers.df &lt;- FindAllMarkers(fibro, test.use = &quot;MAST&quot;, verbose=F)
+head(fibro.markers.df, n = 5)</code></pre>
+<pre class="r"><code>res &lt;- compareCluster(gs.fibro, fun=&quot;enrichPathway&quot;)
+clusterProfiler::dotplot(res, showCategory=3)</code></pre>
+<p><img src="fibroblasts_files/figure-html/unnamed-chunk-10-1.png" width="480" /></p>
+</div>
+<div id="panel" class="section level2">
+<h2>Panel</h2>
+<pre class="r"><code>plot_grid(plotlist = list.plot, ncol =  2)</code></pre>
+<p><img src="fibroblasts_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 
 
