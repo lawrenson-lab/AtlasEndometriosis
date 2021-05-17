@@ -11,7 +11,7 @@
 
 
 
-<title>Epithelial</title>
+<title>Epithelial cells Analysis</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -286,16 +286,19 @@ $(document).ready(function () {
   <a href="index.html">Home</a>
 </li>
 <li>
-  <a href="Epithelial.html">Epithelial cells analysis</a>
+  <a href="epithelial.html">Epithelial cells analysis</a>
 </li>
 <li>
   <a href="en-epi.html">Endometrial-type Epithelial analysis</a>
 </li>
 <li>
-  <a href="meso-epi.html">Mesothelial Epithelial analysis</a>
+  <a href="meso-epi.html">Mesothelial cells analysis</a>
 </li>
 <li>
-  <a href="Fibroblasts.html">Fibroblasts analysis</a>
+  <a href="fibroblasts.html">Fibroblasts analysis</a>
+</li>
+<li>
+  <a href="trajectory.html">Cell trajectory analysis</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -309,13 +312,11 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Epithelial</h1>
+<h1 class="title toc-ignore">Epithelial cells Analysis</h1>
 
 </div>
 
 
-<div id="epithelial-cells-analysis" class="section level1">
-<h1>Epithelial cells Analysis</h1>
 <p>Load cohort annotation file and Epithelial cells Seurat object</p>
 <pre class="r"><code>epi = readRDS(&quot;rds/epithelial.cells.15.clusters.rds&quot;)
 levels(epi@meta.data$seurat_clusters) &lt;- c(&quot;EnEpi_1&quot;, &quot;Meso_1&quot;, &quot;EnEpi_2&quot;, &quot;EnEpi_3&quot;, &quot;UnEpi_1&quot;, &quot;Meso_2&quot;, &quot;Meso_3&quot;, &quot;EnEpi_4&quot;,
@@ -330,6 +331,24 @@ Idents(object = epi) &lt;- epi@meta.data$seurat_clusters</code></pre>
 <p><img src="epithelial_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <div id="section" class="section level2">
 <h2></h2>
+<pre class="r"><code>prop.cells &lt;- data.frame(table(Idents(epi)))
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title=&quot;Number of cells in each cluster&quot;, x =&quot;Clusters&quot;, y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="epithelial_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>##
+epi@active.ident &lt;- factor(epi@active.ident,
+                           levels=c(&quot;EnEpi_1&quot;, &quot;EnEpi_2&quot;, &quot;EnEpi_3&quot;, &quot;EnEpi_4&quot;, &quot;EnEpi_5&quot;, &quot;EnEpi_6&quot;, 
+                                    &quot;Meso_1&quot;, &quot;Meso_2&quot;, &quot;Meso_3&quot;, &quot;Meso_4&quot;, &quot;Meso_5&quot;, &quot;Meso_6&quot;,
+                                    &quot;UnEpi_1&quot;, &quot;UnEpi_2&quot;, &quot;UnEpi_3&quot;, &quot;UnEpi_4&quot;)
+)</code></pre>
 <pre class="r"><code>selected.features = c(&quot;CDH1&quot;, &quot;HIF1A&quot;, &quot;LGR5&quot;, &quot;EPCAM&quot;, &quot;KRT7&quot;, &quot;KRT8&quot;, &quot;KRT10&quot;, &quot;KRT17&quot;, &quot;KRT18&quot;, &quot;KRT19&quot;, &quot;ACTA2&quot;,&quot;THY1&quot;, &quot;CD44&quot;, &quot;FOXJ1&quot;, &quot;PAX8&quot;, &quot;ESR1&quot;, &quot;PGR&quot;, &quot;WT1&quot;, &quot;CALB2&quot;, &quot;DES&quot;, &quot;PDPN&quot;)
 
 DotPlot(object = epi, assay = &quot;RNA&quot;, features = selected.features) +
@@ -358,7 +377,6 @@ clusterProfiler::dotplot(res, showCategory=3)</code></pre>
 <h2>Panel</h2>
 <pre class="r"><code>plot_grid(plotlist = list.plot, ncol =  2)</code></pre>
 <p><img src="epithelial_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-</div>
 </div>
 
 
