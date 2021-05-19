@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Deconvolution analysis</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="epithelial.html">Epithelial cells analysis</a>
+</li>
+<li>
+  <a href="en-epi.html">Endometrial-type Epithelial analysis</a>
+</li>
+<li>
+  <a href="meso-epi.html">Mesothelial cells analysis</a>
+</li>
+<li>
+  <a href="fibroblasts.html">Fibroblasts analysis</a>
+</li>
+<li>
+  <a href="trajectory.html">Cell trajectory analysis</a>
+</li>
+<li>
+  <a href="deconvolution.html">Deconvolution analysis</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Deconvolution analysis</h1>
+
+</div>
+
+
+<div id="load-gse129617-expression-data" class="section level2">
+<h2>Load GSE129617 expression data</h2>
+<pre class="r"><code>title = &quot;25 CCOC&quot;
+load(&quot;data/ccoc_GSE129617.expr_25_samples.rda&quot;)
+dim(GSE129617.expr)</code></pre>
+<pre><code>## [1] 43288    25</code></pre>
+<pre class="r"><code>df &lt;- data.frame(histotype = c(rep(&#39;CCOC&#39;, 25)))
+rownames(df) &lt;- colnames(GSE129617.expr)
+# Heapmap 0: plot top variable genes
+matrix &lt;- GSE129617.expr
+matrix &lt;- matrix[!duplicated(rownames(matrix)) &amp; rownames(matrix) %in% 
+                   bm$external_gene_name[!is.na(bm$gene_biotype) &amp; 
+                                           bm$gene_biotype == &#39;protein_coding&#39;],]
+sd &lt;- apply(X = matrix, MARGIN = 1, FUN = sd)
+rank &lt;- (length(sd) - rank(sd) + 1)
+select &lt;- rank &lt;= 500
+
+pheatmap(matrix[select,], cluster_rows=T, show_rownames=F, cluster_cols=T, annotation_col = df, 
+         main = paste0(&#39;Top &#39;,sum(select),&#39; protein coding genes (n=&#39;, nrow(matrix), &quot;)&quot;))</code></pre>
+<p><img src="deconvolution_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>matrix.eset = ExpressionSet(assayData=matrix, phenoData = new(&quot;AnnotatedDataFrame&quot;,data=df))</code></pre>
+<pre class="r"><code>sc = readRDS(&quot;rds/epithelial.cells.15.clusters.rds&quot;)
+
+levels(sc@meta.data$seurat_clusters) &lt;- c(&quot;EnEpi_1&quot;, &quot;Meso_1&quot;, &quot;EnEpi_2&quot;, &quot;EnEpi_3&quot;, &quot;UnEpi_1&quot;, &quot;Meso_2&quot;, &quot;Meso_3&quot;, &quot;EnEpi_4&quot;,
+                                           &quot;EnEpi_5&quot;, &quot;Meso_4&quot;, &quot;Meso_5&quot;, &quot;UnEpi_2&quot;, &quot;EnEpi_6&quot;, &quot;UnEpi_3&quot;, &quot;Meso_6&quot;,
+                                           &quot;UnEpi_4&quot;
+)
+Idents(object = sc) &lt;- sc@meta.data$seurat_clusters</code></pre>
+<pre class="r"><code>prop.cells = data.frame(table(sc@meta.data$active.cluster))
+prop.cells &lt;- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title=&quot;Number of cells in each cell type&quot;, x =&quot;Cell type&quot;, y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="deconvolution_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>prop.cells = data.frame(table(sc@meta.data$Major.Class_2.0))
+prop.cells &lt;- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title=&quot;&quot;, x =&quot;Major class&quot;, y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="deconvolution_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<pre class="r"><code>sc.sel = subset(sc, subset = seurat_clusters %in% c(&quot;EnEpi_1&quot;, &quot;EnEpi_2&quot;, &quot;EnEpi_3&quot;, &quot;EnEpi_4&quot;, &quot;EnEpi_5&quot;, &quot;EnEpi_6&quot;))
+sc.sel = subset(sc.sel, subset = Major.Class_2.0 %in% c(&quot;Endometrioma&quot;, &quot;Eutopic Endometrium&quot;, &quot;Extra-ovarian endometriosis&quot;))
+single.cell.expression.set &lt;- SeuratToExpressionSet(sc.sel, delimiter=&#39;-&#39;, position=2, version=&quot;v3&quot;)
+phenoData(single.cell.expression.set) &lt;- AnnotatedDataFrame(sc.sel@meta.data)
+
+
+prop.cells = data.frame(table(sc.sel@meta.data$active.cluster))
+prop.cells &lt;- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title=&quot;Number of cells in each cell type&quot;, x =&quot;Cell type&quot;, y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="deconvolution_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>prop.cells = data.frame(table(sc.sel@meta.data$Major.Class_2.0))
+prop.cells &lt;- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title=&quot;&quot;, x =&quot;Major class&quot;, y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="deconvolution_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+</div>
+<div id="estimate-cell-type-proportions" class="section level1">
+<h1>Estimate cell type proportions</h1>
+<pre><code>               verbose = T)</code></pre>
+<pre class="r"><code>Est.prop = music_prop(bulk.eset = matrix.eset,
+                      sc.eset = single.cell.expression.set, 
+                      clusters = &#39;seurat_clusters&#39;,
+                      samples = &#39;SampleName&#39;,
+                      verbose = F)</code></pre>
+<pre class="r"><code>bp.esti.pro = Est.prop$Est.prop.weighted
+bp.esti.pro = merge(bp.esti.pro, df, by=0)
+bp.esti.pro = bp.esti.pro[match(rownames(df), bp.esti.pro$Row.names), ]
+head(bp.esti.pro)</code></pre>
+<pre><code>##    Row.names EnEpi_3 EnEpi_2 EnEpi_5 EnEpi_6   EnEpi_4   EnEpi_1 histotype
+## 1 GSM3717100       0       0       0       0 0.8822250 0.1177750      CCOC
+## 2 GSM3717101       0       0       0       0 0.8819691 0.1180309      CCOC
+## 3 GSM3717102       0       0       0       0 0.8257661 0.1742339      CCOC
+## 4 GSM3717103       0       0       0       0 0.8835599 0.1164401      CCOC
+## 5 GSM3717104       0       0       0       0 0.8944826 0.1055174      CCOC
+## 6 GSM3717105       0       0       0       0 0.8383448 0.1616552      CCOC</code></pre>
+<pre class="r"><code>collorder = c(&quot;#8dd3c7&quot;, &quot;#ffffb3&quot;, &quot;#bebada&quot;, &quot;#fb8072&quot;, &quot;#80b1d3&quot;, &quot;#fdb462&quot;)
+anno_width = unit(3, &quot;cm&quot;)
+ht_list = rowAnnotation(text = anno_text(bp.esti.pro$Row.names,location = unit(1, &quot;npc&quot;), 
+                just = &quot;right&quot;,
+                gp = gpar(fontsize = 12)))
+
+ht_list = ht_list + rowAnnotation(&quot;est&quot; = anno_barplot(bp.esti.pro[, c(2:7)], bar_width = 1, gp = gpar(fill = collorder, fontsize = 14), 
+                                          width = anno_width), show_annotation_name = FALSE) +
+  rowAnnotation(Histotype = anno_simple(bp.esti.pro$histotype), gp = gpar(fontsize = 20))
+
+draw(ht_list, heatmap_legend_list = Legend(title = &quot;EnEpi Clusters&quot;, labels = colnames(bp.esti.pro[, c(2:7)]), legend_gp = gpar(fill = collorder)))</code></pre>
+<p><img src="deconvolution_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
