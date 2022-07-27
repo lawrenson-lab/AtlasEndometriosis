@@ -20,5 +20,7 @@ navbar:
       href: figure7.html  
     - text: "Figure 8"
       href: figure8.html  
-
+  right:
+    - icon: fa-question fa-lg
+      href: https://example.com
 ---
