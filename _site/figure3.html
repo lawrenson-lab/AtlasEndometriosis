@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Figure 3</title>
+
+<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="figure2.html">Figure 2</a>
+</li>
+<li>
+  <a href="figure3.html">Figure 3</a>
+</li>
+<li>
+  <a href="figure4.html">Figure 4</a>
+</li>
+<li>
+  <a href="figure5.html">Figure 5</a>
+</li>
+<li>
+  <a href="figure6.html">Figure 6</a>
+</li>
+<li>
+  <a href="figure7.html">Figure 7</a>
+</li>
+<li>
+  <a href="figure8.html">Figure 8</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Figure 3</h1>
+
+</div>
+
+
+<p>Load cohort annotation file and Epithelial cells Seurat object</p>
+<pre class="r"><code>.sc = readRDS(file = &quot;rds/epithelial.annotated.rds&quot;)
+
+.sc@active.ident &lt;- factor(.sc@active.ident,
+                          levels=c(&quot;Mesothelial (3)&quot;,
+                                   &quot;Mesothelial (2)&quot;,
+                                   &quot;Mesothelial (1)&quot;,
+                                   &quot;KRT10/ACTA2 (3)&quot;,
+                                   &quot;KRT10/ACTA2 (2)&quot;,
+                                   &quot;KRT10/ACTA2 (1)&quot;,
+                                   &quot;Ciliated&quot;,
+                                   &quot;Glandular secretory&quot;,
+                                   &quot;MUC5B+&quot;,
+                                   &quot;IHH+ SPDEF+&quot;,
+                                   &quot;SOX9+ LGR5+&quot;)
+)
+
+
+levels(.sc@meta.data$active.cluster) &lt;-c(&quot;SOX9+ LGR5+&quot;,
+                                         &quot;IHH+ SPDEF+&quot;,
+                                         &quot;MUC5B+&quot;,
+                                         &quot;Glandular secretory&quot;,
+                                         &quot;Ciliated&quot;,
+                                         &quot;KRT10/ACTA2 (1)&quot;,
+                                         &quot;KRT10/ACTA2 (2)&quot;,
+                                         &quot;KRT10/ACTA2 (3)&quot;,
+                                         &quot;Mesothelial (1)&quot;,
+                                         &quot;Mesothelial (2)&quot;,
+                                         &quot;Mesothelial (3)&quot;)
+
+.sc@meta.data$active.cluster &lt;- .sc@active.ident</code></pre>
+<div id="figure-3-a" class="section level2">
+<h2>Figure 3-A</h2>
+<pre class="r"><code>DimPlot(object = .sc, pt.size = 0.1, group.by =&quot;active.cluster&quot;, label = F, raster=FALSE)</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-3-c" class="section level2">
+<h2>Figure 3-C</h2>
+<pre class="r"><code>prop.cells &lt;- data.frame(table(Idents(.sc)))
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title=&quot;Number of cells in each cluster&quot;, x =&quot;Clusters&quot;, y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>bsize = 14
+counts.prop = data.frame(table(.sc@meta.data$Major.Class, .sc@meta.data$active.cluster))
+counts.prop.perc = group_by(counts.prop, Var2) %&gt;% mutate(percent = Freq/sum(Freq))
+
+aux = aggregate(counts.prop$Freq, by=list(Category=counts.prop$Var1), FUN=sum)
+aux$Var2 = &quot;Total&quot;
+colnames(aux) &lt;- c(&quot;Var1&quot;, &quot;Freq&quot;, &quot;Var2&quot;)
+aux$percent = aux$Freq / sum(aux$Freq)
+counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
+
+p1 &lt;- ggplot(counts.prop.perc, aes(x = Var2, y = percent, fill = Var1, group=Var2)) + 
+        geom_bar(position=&quot;stack&quot;,stat = &quot;identity&quot;, width=0.8) +
+        scale_fill_manual(name=&quot;Class&quot;, values = c(&quot;Endometrioma&quot; = &quot;#7b3294&quot;, 
+                                                   &quot;Eutopic Endometrium&quot; = &quot;#c2a5cf&quot;, 
+                                                   &quot;Endometriosis&quot; = &quot;#d9f0d3&quot;, 
+                                                   &quot;No endometriosis detected&quot; = &quot;#a6dba0&quot;,
+                                                   &quot;Unaffected ovary&quot; = &quot;#008837&quot;)) +
+        #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var2))) +
+        coord_flip() +
+        theme_set(theme_gray(base_size = bsize)) +
+        theme(plot.title = element_text(hjust = 0.5),
+              axis.text.x = element_text(angle = 270, hjust = 1),
+              axis.text.y = element_text(angle = 0, hjust = 1),
+              axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              legend.position = &quot;none&quot;)
+p1</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-3-b" class="section level2">
+<h2>Figure 3-B</h2>
+<pre class="r"><code>table.gene.markers &lt;- data.frame(Gene=c(&quot;SERPINA5&quot;, &quot;PAEP&quot;, &quot;DPP4&quot;, &quot;SPP1&quot;), 
+                                       Cell=&quot;Secretory&quot;)
+table.gene.markers &lt;- rbind(table.gene.markers,
+                            data.frame(Gene=c(&quot;ENPP3&quot;, &quot;CREB3L1&quot;, &quot;GNG11&quot;, &quot;IHH&quot;), 
+                                       Cell=&quot;Late Proliferative&quot;))
+table.gene.markers &lt;- rbind(table.gene.markers,
+                            data.frame(Gene=c(&quot;ESR1&quot;, &quot;PGR&quot;, &quot;TIMP1&quot;, &quot;MMP7&quot;), 
+                                       Cell=&quot;Early Proliferative&quot;))
+table.gene.markers &lt;- rbind(table.gene.markers,
+                            data.frame(Gene=c(&quot;THY1&quot;, &quot;ACTA2&quot;), 
+                                       Cell=&quot;Mesenchymal&quot;))
+table.gene.markers &lt;- rbind(table.gene.markers, 
+                            data.frame(Gene=c(&quot;WT1&quot;, &quot;DES&quot;, &quot;CALB2&quot;, &quot;PDPN&quot;, &quot;MSLN&quot; ), 
+                                       Cell=&quot;Mesothelial&quot;))
+table.gene.markers &lt;- rbind(table.gene.markers, 
+                            data.frame(Gene=c(&quot;TPPP3&quot;, &quot;PIFO&quot;, &quot;FOXJ1&quot;), 
+                                       Cell=&quot;Ciliated&quot;))
+table.gene.markers &lt;- rbind(table.gene.markers,
+                            data.frame(Gene=c(&quot;GDA&quot;, &quot;FGFR2&quot;, &quot;WNT7A&quot;, &quot;FGF9&quot;, &quot;LGR5&quot;, &quot;PTGS1&quot;),
+                                       Cell=&quot;Lumenal&quot;))
+table.gene.markers &lt;- rbind(table.gene.markers, 
+                            data.frame(Gene=c(&quot;EPCAM&quot;, &quot;KRT7&quot;, &quot;KRT8&quot;, &quot;KRT10&quot;, &quot;KRT18&quot;, &quot;KRT19&quot;, &quot;PAX8&quot;, &quot;PAX2&quot;, &quot;SPDEF&quot;), 
+                                       Cell=&quot;Epithelial/Gynecologic&quot;))
+table.gene.markers &lt;- rbind(table.gene.markers, 
+                            data.frame(Gene=c(&quot;MUC5B&quot;, &quot;TFF3&quot;, &quot;HIF1A&quot;, &quot;SOX9&quot;, &quot;LGR5&quot;, &quot;CD44&quot;), 
+                                       Cell=&quot;Progenitors&quot;))
+
+pd &lt;- DotPlot(object = .sc, assay = &quot;RNA&quot;, features = rev(unique(table.gene.markers$Gene)))+
+        theme(axis.text.x = element_text(angle = 90)) +
+        #coord_flip() +
+        scale_colour_gradient2(low = &quot;#2166ac&quot;, mid = &quot;#f7f7f7&quot;, high = &quot;#b2182b&quot;) 
+pd</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
+</div>
+<div id="figure-3-d" class="section level2">
+<h2>Figure 3-D</h2>
+<pre class="r"><code>.sel.sc = subset(sel.sc, subset = Major.Class %in% c(&quot;Eutopic Endometrium&quot;))
+
+
+prop &lt;- data.frame(table(.sel.sc@meta.data$active.cluster, .sel.sc@meta.data$Menstrual.Cycle))
+counts.prop.perc = group_by(prop, Var1) %&gt;% mutate(percent = Freq/sum(Freq))
+
+aux = aggregate(prop$Freq, by=list(Category=prop$Var2), FUN=sum)
+aux$Var1 = &quot;Total&quot;
+colnames(aux) &lt;- c(&quot;Var2&quot;, &quot;Freq&quot;, &quot;Var1&quot;)
+aux$percent = aux$Freq / sum(aux$Freq)
+counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
+
+p1 &lt;- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
+        geom_bar(position=&quot;stack&quot;,stat = &quot;identity&quot;, width=0.8) +
+        scale_fill_manual(name=&quot;Menstrual cycle&quot;, values = c(&quot;Follicular&quot; = &quot;orange&quot;, 
+                                                             #&quot;Hormone&quot; = &quot;blue&quot;
+                                                             &quot;Luteal&quot; = &quot;red&quot;
+                                                             )) +
+        #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
+        geom_text(position = position_stack(vjust = 0.5), size = 4, color = &quot;#ffffff&quot;) +
+        theme_set(theme_gray(base_size = bsize)) +
+        theme(plot.title = element_text(hjust = 0.5),
+              axis.text.x = element_text(angle = 90, hjust = 1),
+              axis.text.y = element_text(angle = 0, hjust = 1),
+              axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              legend.position = &quot;right&quot;)+
+        coord_flip()
+p1</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-3-e" class="section level2">
+<h2>Figure 3-E</h2>
+<pre class="r"><code>.sel.sc = subset(sel.sc, subset = Major.Class %in% c(&quot;Endometrioma&quot;,
+                                                    &quot;Endometriosis&quot;))
+
+prop &lt;- data.frame(table(.sel.sc@meta.data$active.cluster, .sel.sc@meta.data$Menstrual.Cycle))
+counts.prop.perc = group_by(prop, Var1) %&gt;% mutate(percent = Freq/sum(Freq))
+
+
+aux = aggregate(prop$Freq, by=list(Category=prop$Var2), FUN=sum)
+aux$Var1 = &quot;Total&quot;
+colnames(aux) &lt;- c(&quot;Var2&quot;, &quot;Freq&quot;, &quot;Var1&quot;)
+aux$percent = aux$Freq / sum(aux$Freq)
+counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
+
+p1 &lt;- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
+        geom_bar(position=&quot;stack&quot;,stat = &quot;identity&quot;, width=0.8) +
+        scale_fill_manual(name=&quot;Menstrual cycle&quot;, values = c(&quot;Follicular&quot; = &quot;orange&quot;, 
+                                                             #&quot;Hormone&quot; = &quot;blue&quot;,
+                                                             &quot;Luteal&quot; = &quot;red&quot;
+                                                             )) +
+        #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
+        geom_text(position = position_stack(vjust = 0.5), size = 4, color = &quot;#ffffff&quot;) +
+        theme_set(theme_gray(base_size = bsize)) +
+        theme(plot.title = element_text(hjust = 0.5),
+              axis.text.x = element_text(angle = 90, hjust = 1),
+              axis.text.y = element_text(angle = 0, hjust = 1),
+              axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              legend.position = &quot;right&quot;)+
+        coord_flip()
+p1</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-3-f" class="section level2">
+<h2>Figure 3-F</h2>
+<pre class="r"><code>Idents(object = sel.sc) &lt;- sel.sc@meta.data$Major.Class
+markers.sel.sc = FindAllMarkers(sel.sc, test.use = &quot;MAST&quot;,  verbose = TRUE)
+
+p.v = 0.05
+fc = 1
+markers.sel.sc$STATUS = &quot;NOT.SIG&quot;
+markers.sel.sc[markers.sel.sc$avg_log2FC &lt; -fc &amp; markers.sel.sc$p_val_adj &lt; p.v, ]$STATUS = &quot;Down&quot;
+markers.sel.sc[markers.sel.sc$avg_log2FC &gt; fc &amp; markers.sel.sc$p_val_adj &lt; p.v, ]$STATUS = &quot;Up&quot;
+
+
+features.deg = NULL
+for (o in unique(markers.sel.sc$cluster)) {
+        features.deg = c(features.deg, head(markers.sel.sc$gene[markers.sel.sc$cluster == o  &amp; markers.sel.sc$STATUS == &quot;Up&quot;], 10))
+}
+
+
+pd &lt;- DotPlot(sel.sc, features = unique(features.deg)) +
+        scale_colour_gradient2(low = &quot;#2166ac&quot;, mid = &quot;#f7f7f7&quot;, high = &quot;#b2182b&quot;) +
+        coord_flip() +
+        RotatedAxis()
+pd</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-10-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-3-g" class="section level2">
+<h2>Figure 3-G</h2>
+<pre class="r"><code>res &lt;- compareCluster(gs.epi, fun=&quot;enrichPathway&quot;)
+
+p + theme(axis.text.x=element_text(angle=90, hjust=1))</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-12-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>sel.sc = subset(.sc, subset = active.cluster %in% c(&quot;KRT10/ACTA2 (1)&quot;, 
+                                                    &quot;KRT10/ACTA2 (2)&quot;, 
+                                                    &quot;KRT10/ACTA2 (3)&quot;
+))
+
+
+sel.sc = subset(sel.sc, subset = Major.Class %in% c(&quot;Endometrioma&quot;,
+                                                    &quot;Eutopic Endometrium&quot;,
+                                                    &quot;Endometriosis&quot;))
+
+sel.sc@meta.data &lt;- droplevels(sel.sc@meta.data)
+
+prop.cells &lt;- data.frame(table(sel.sc@meta.data$active.cluster))
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+ggplot(prop.cells, aes(Var1, Freq)) +
+        geom_col() +
+        theme_minimal(base_size = 15) +
+        geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+        theme(plot.title = element_text(hjust = 0.5),
+              axis.text.x = element_text(angle = 45, hjust = 1),
+              axis.title.x = element_blank()) +
+        labs(y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>prop.cells &lt;- data.frame(table(sel.sc@meta.data$Major.Class))
+prop.cells$Var1 &lt;- factor(prop.cells$Var1, levels = prop.cells$Var1)
+ggplot(prop.cells, aes(Var1, Freq)) +
+        geom_col() +
+        theme_minimal(base_size = 15) +
+        geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+        theme(plot.title = element_text(hjust = 0.5),
+              axis.text.x = element_text(angle = 45, hjust = 1),
+              axis.title.x = element_blank()) +
+        labs(y = &quot;Number of Cells&quot;)</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-3-i" class="section level2">
+<h2>Figure 3-I</h2>
+<pre class="r"><code>Idents(object = sel.sc) &lt;- sel.sc@meta.data$Major.Class
+
+markers.sel.sc = FindAllMarkers(sel.sc, test.use = &quot;MAST&quot;,  verbose = TRUE)
+
+p.v = 0.05
+fc = 1
+markers.sel.sc$STATUS = &quot;NOT.SIG&quot;
+markers.sel.sc[markers.sel.sc$avg_log2FC &lt; -fc &amp; markers.sel.sc$p_val_adj &lt; p.v, ]$STATUS = &quot;Down&quot;
+markers.sel.sc[markers.sel.sc$avg_log2FC &gt; fc &amp; markers.sel.sc$p_val_adj &lt; p.v, ]$STATUS = &quot;Up&quot;
+
+features.deg = NULL
+for (o in unique(markers.sel.sc$cluster)) {
+        features.deg = c(features.deg, head(markers.sel.sc$gene[markers.sel.sc$cluster == o  &amp; markers.sel.sc$STATUS == &quot;Up&quot;], 10))
+}
+
+
+pd &lt;- DotPlot(sel.sc, features = unique(features.deg)) +
+        scale_colour_gradient2(low = &quot;#2166ac&quot;, mid = &quot;#f7f7f7&quot;, high = &quot;#b2182b&quot;) +
+        coord_flip() +
+        RotatedAxis()
+pd</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-14-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-3-h" class="section level2">
+<h2>Figure 3-H</h2>
+<pre class="r"><code>res &lt;- compareCluster(gs.epi, fun=&quot;enrichPathway&quot;)
+
+p + theme(axis.text.x=element_text(angle=90, hjust=1))</code></pre>
+<p><img src="figure3_files/figure-html/unnamed-chunk-16-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
