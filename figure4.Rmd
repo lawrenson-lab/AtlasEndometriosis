@@ -1,0 +1,140 @@
+---
+title: "Figure 4"
+---
+
+
+```{r include = FALSE}
+rm(list = ls())
+
+library(ComplexHeatmap)
+library(circlize)
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(cowplot)
+library(tidyr)
+library(corrplot)
+library('org.Hs.eg.db')
+library(ReactomePA)
+library("AnnotationDbi")
+library("clusterProfiler")
+library(reshape2)
+library(ggrepel)
+
+```
+
+## Figure 4-A
+
+```{r include = T, eval=T, fig.align='center', fig.height=10, fig.width=8.5}
+
+data.table = data.frame(readxl::read_xlsx("files/Mutation Summary Updated_2.0.xlsx"))
+
+data.table = data.table[order(data.table$Major.Class, data.table$Case, decreasing = T),]
+data.table$Case = paste0(data.table$Case, " ", data.table$Type)
+data.table$Case <- factor(data.table$Case, levels = data.table$Case)
+data.table.m = melt(data.table[, c('Case',  'ARID1A', 'KRAS', "Major.Class")], id.vars = "Case")
+
+grid.newpage()
+gridExtra::grid.table(data.table, rows=NULL)
+```
+
+```{r include = T, eval=T, fig.align='center', fig.height=8, fig.width=9}
+
+ggplot(data.table.m, aes(x = variable, y = Case, color = as.factor(value))) + 
+  geom_point(size = 7) +
+  theme_bw(base_size = 15) +
+  scale_color_manual(name="Class", values = c("Endometrioma" = "#7b3294", 
+                                              "Eutopic Endometrium" = "#c2a5cf", 
+                                              "Extra-ovarian endometriosis" = "#d9f0d3", 
+                                              "No endometriosis detected" = "#a6dba0",
+                                              "Unaffected ovary" = "#008837",
+                                              "NP" = "#f7f7f7",
+                                              "Positive" = "#bd0026",
+                                              "Negative" = "#ffffb2",
+                                              "Heterogenous" = "#fd8d3c",
+                                              "WT" = "#3182bd",
+                                              "Mut" = "#31a354")) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank())
+
+```
+
+## Figure 4-C
+
+```{r include = T, eval=T, fig.align='center'}
+
+markers.sel.sc = read.delim("files/DEG.endometrial.type.epi.KRAS_Status")
+
+p.v = 0.05
+fc = 0.6
+markers.sel.sc$STATUS = "NOT.SIG"
+markers.sel.sc[markers.sel.sc$avg_logFC < -fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Down"
+markers.sel.sc[markers.sel.sc$avg_logFC > fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Up"
+
+
+c = "Mut"
+sc.markers.filt = markers.sel.sc[markers.sel.sc$cluster == c,]
+nDEG = nrow(sc.markers.filt)
+genes = sc.markers.filt$gene[sc.markers.filt$cluster == c & sc.markers.filt$STATUS != "NOT.SIG"]
+
+vp = ggplot(sc.markers.filt, aes(x = avg_logFC, y = -log10(p_val_adj))) +
+  geom_point(aes(color = STATUS), cex = 1.45) +
+  scale_color_manual(values = c("darkgreen", "grey", "red")) +
+  theme_bw(base_size = 15) + 
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  geom_text_repel(
+    data = sc.markers.filt[genes,],
+    aes(label = sc.markers.filt$gene[which(sc.markers.filt$gene %in% genes)]),
+    size = 5,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines")
+  ) +
+  labs(title = paste0("Cluster ", c, " (n=", nDEG, ")"))
+vp
+
+
+
+```
+## Figure 4-D
+
+
+```{r include = T, eval=T,  fig.align='center'}
+
+markers.sel.sc = read.delim("files/DEG.endometrial.type.epi.ARID1A_Status")
+
+p.v = 0.05
+fc = 0.5
+markers.sel.sc$STATUS = "NOT.SIG"
+markers.sel.sc[markers.sel.sc$avg_logFC < -fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Down"
+markers.sel.sc[markers.sel.sc$avg_logFC > fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Up"
+
+
+c = "Heterogenous"
+sc.markers.filt = markers.sel.sc[markers.sel.sc$cluster == c,]
+nDEG = nrow(sc.markers.filt)
+genes = sc.markers.filt$gene[sc.markers.filt$cluster == c & sc.markers.filt$STATUS != "NOT.SIG"]
+
+vp = ggplot(sc.markers.filt, aes(x = avg_logFC, y = -log10(p_val_adj))) +
+  geom_point(aes(color = STATUS), cex = 1.45) +
+  scale_color_manual(values = c("darkgreen", "grey", "red")) +
+  theme_bw(base_size = 15) + 
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  geom_text_repel(
+    data = sc.markers.filt[genes,],
+    aes(label = sc.markers.filt$gene[which(sc.markers.filt$gene %in% genes)]),
+    size = 5,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines")
+  ) +
+  labs(title = paste0("Cluster ", c, " (n=", nDEG, ")"))
+vp
+
+
+
+```
+
+

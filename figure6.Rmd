@@ -1,0 +1,437 @@
+---
+title: "Figure 6"
+---
+
+
+```{r include = FALSE}
+rm(list = ls())
+
+library(ComplexHeatmap)
+library(circlize)
+library(Seurat)
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(plotly)
+library(cowplot)
+library(tidyr)
+library(corrplot)
+library('org.Hs.eg.db')
+library(ReactomePA)
+library("AnnotationDbi")
+library("clusterProfiler")
+library(knitr)
+library(RColorBrewer)
+library (pheatmap)
+
+```
+
+Load cohort annotation file and Mesenchymal cells Seurat object
+
+## Figure 6-A
+
+```{r include = T, eval=T, fig.align='center', message=F, warning=F}
+.sc.fibro = readRDS(file = "rds/fibroblasts.annotated.rds")
+.sc.fibro@meta.data$Major.Class[.sc.fibro@meta.data$Major.Class == "Extra-ovarian endometriosis"] = "Endometriosis"
+
+p4 = DimPlot(object = .sc.fibro, pt.size = 0.1, group.by ="active.cluster", label = T, raster=FALSE)
+p4
+```
+
+```{r include = T, eval=T, fig.align='center', message=F, warning=F, fig.width=12, fig.height=4}
+
+p4 = DimPlot(object = .sc.fibro, pt.size = 0.1, group.by ="active.cluster", split.by = "Major.Class",  label = F, raster=FALSE, ncol = 5)
+p4
+
+
+.sc.fibro@active.ident <- factor(.sc.fibro@active.ident,
+                           levels=rev(c("EnS_Proliferative",
+                                    "EnS_Secretory",
+                                    "Fibro (1)",
+                                    "Fibro (2)",
+                                    "Fibro (3)",
+                                    "Fibro (4)",
+                                    "C7_Fibro (1)",
+                                    "C7_Fibro (2)",
+                                    "C7_Fibro (3)",
+                                    "Activated_Fibro",
+                                    "C7_Activated_Fibro",
+                                    "Smooth_Muscle",
+                                    "GAS5+"))
+)
+
+
+levels(.sc.fibro@meta.data$active.cluster) <-rev(c("EnS_Proliferative",
+                                                   "EnS_Secretory",
+                                                   "Fibro (1)",
+                                                   "Fibro (2)",
+                                                   "Fibro (3)",
+                                                   "Fibro (4)",
+                                                   "C7_Fibro (1)",
+                                                   "C7_Fibro (2)",
+                                                   "C7_Fibro (3)",
+                                                   "Activated_Fibro",
+                                                   "C7_Activated_Fibro",
+                                                   "Smooth_Muscle",
+                                                   "GAS5+"))
+
+.sc.fibro@meta.data$active.cluster <- .sc.fibro@active.ident
+
+
+```
+
+## Figure 5-B
+
+``` {r include=T, eval=F, message=F, warning=F, fig.align='center'}
+
+table.gene.markers <- data.frame(Gene=c("MME"),
+                                 Cell="Endometrial-type stroma")
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("ESR1", "PGR", "IGF1", "MMP11", "CRABP2", "ECM1"), 
+                                       Cell="Proliferative"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("PAEP", "FOXO1", "IL15"), 
+                                       Cell="Secretory"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("DCN", "PDGFRA", "THY1", "COL1A1", "PCOLCE"), 
+                                       Cell="Fibroblasts"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("C7", "OGN", "CFD"), 
+                                       Cell="C7 fibroblasts"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("ITGB1", "FAP",  "ACTA2"), 
+                                       Cell="Activated fibroblasts"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("ACTG2", "MCAM"), 
+                                       Cell="Uterine smooth muscle"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("GAS5"), 
+                                       Cell="GAS5+"))
+
+pd <- DotPlot(object = .sc.fibro, assay="RNA", features = unique(table.gene.markers$Gene)) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b")
+pd
+
+```
+
+``` {r include=T, message=F, eval=T,  warning=F, fig.align='center', fig.width = 8, fig.height=5}
+img1_path = "plots/6E-DOTPLOT-markers.pdf"
+include_graphics(img1_path)
+
+```
+
+
+## Figure 5-C
+
+``` {r include=T, message=F, warning=F, fig.align='center'}
+
+bsize = 14
+counts.prop = data.frame(table(.sc.fibro@meta.data$Major.Class, .sc.fibro@meta.data$active.cluster))
+counts.prop.perc = group_by(counts.prop, Var2) %>% mutate(percent = Freq/sum(Freq))
+
+aux = aggregate(counts.prop$Freq, by=list(Category=counts.prop$Var1), FUN=sum)
+aux$Var2 = "Total"
+colnames(aux) <- c("Var1", "Freq", "Var2")
+aux$percent = aux$Freq / sum(aux$Freq)
+counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
+
+p1 <- ggplot(counts.prop.perc, aes(x = Var2, y = percent, fill = Var1, group=Var2)) + 
+  geom_bar(position="stack",stat = "identity", width=0.8) +
+  scale_fill_manual(name="Class", values = c("Endometrioma" = "#7b3294", 
+                                             "Eutopic Endometrium" = "#c2a5cf", 
+                                             "Endometriosis" = "#d9f0d3", 
+                                             "No endometriosis detected" = "#a6dba0",
+                                             "Unaffected ovary" = "#008837")) +
+  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var2))) +
+  coord_flip() +
+  theme_set(theme_gray(base_size = bsize)) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 270, hjust = 1),
+        axis.text.y = element_text(angle = 0, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none")
+p1
+
+```
+
+
+
+## Figure 6-D
+
+``` {r include=T, eval=T,  message=F, warning=F, fig.align='center'}
+
+sel.sc = readRDS("rds/EnS_cells.rds")
+```
+
+``` {r include=T, eval=F,  message=F, warning=F, fig.align='center'}
+
+.sc = subset(.sc.fibro, subset = active.cluster %in% c("EnS_Proliferative", "EnS_Secretory"))
+
+sel.sc = subset(.sc, subset = Major.Class %in% c("Endometrioma",
+                                                    "Eutopic Endometrium",
+                                                    "Endometriosis"))
+
+sel.sc@meta.data <- droplevels(sel.sc@meta.data)
+
+```
+
+``` {r include=T, message=F, warning=F, fig.align='center'}
+
+prop.cells <- data.frame(table(sel.sc@meta.data$active.cluster))
+prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(y = "Number of Cells")
+
+prop.cells <- data.frame(table(sel.sc@meta.data$Major.Class))
+prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(y = "Number of Cells")
+
+```
+
+``` {r include=T, message=F, warning=F, fig.align='center',  fig.width = 5, fig.height=9}
+Idents(object = sel.sc) <- sel.sc@meta.data$Major.Class
+
+markers.sel.sc = FindAllMarkers(sel.sc, test.use = "MAST",  verbose = TRUE)
+
+p.v = 0.05
+fc = 0.5
+markers.sel.sc$STATUS = "NOT.SIG"
+markers.sel.sc[markers.sel.sc$avg_log2FC < -fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Down"
+markers.sel.sc[markers.sel.sc$avg_log2FC > fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Up"
+
+features.deg = NULL
+for (o in unique(markers.sel.sc$cluster)) {
+  features.deg = c(features.deg, head(markers.sel.sc$gene[markers.sel.sc$cluster == o  & markers.sel.sc$STATUS == "Up"], 10))
+}
+
+
+pd <- DotPlot(sel.sc, features = unique(features.deg)) +
+  scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b") +
+  coord_flip() +
+  RotatedAxis()
+pd
+
+```
+
+
+```{r include=F, warning=F, message=F, fig.align='center'}
+
+info.table = data.frame(Patient=c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21), 
+                        Endo=c("Yes", "No", "Yes", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "No", "Yes", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes"),
+                        Menstrual.Cycle = c("Luteal", "Hormone", "Luteal", "Luteal", "Hormone", "Hormone", "Follicular", "Follicular", "Follicular",
+                                            "Luteal", "Hormone", "Hormone", "Luteal", "Luteal", "Follicular", "Luteal", "Hormone", "Luteal", "Follicular", "Follicular"),
+                        Hormone=c("No", "Yes", "No", "No", "Yes", "Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "No", "No", "Yes", "No", "No", "No")
+)
+grid.newpage()
+gridExtra::grid.table(info.table)
+
+info.table = info.table[!info.table$Menstrual.Cycle == "Hormone",]
+
+sel.sc@meta.data$Endo = NA
+sel.sc@meta.data$Menstrual.Cycle = NA
+sel.sc@meta.data$Hormone = NA
+
+for (i in 1:nrow(info.table)) {
+  p = info.table$Patient[i]
+  sel.sc@meta.data$Endo[sel.sc@meta.data$Patient.No. == p] <- info.table$Endo[i]
+  sel.sc@meta.data$Menstrual.Cycle[sel.sc@meta.data$Patient.No. == p] <- info.table$Menstrual.Cycle[i]
+  sel.sc@meta.data$Hormone[sel.sc@meta.data$Patient.No. == p] <- info.table$Hormone[i]
+}
+
+
+```
+
+## Figure 6-F
+
+```{r include=T, warning=F, message=F, fig.align='center', fig.width = 8, fig.height= 4}
+.sel.sc = subset(sel.sc, subset = Major.Class %in% c("Eutopic Endometrium"))
+
+prop <- data.frame(table(.sel.sc@meta.data$Major.Class, .sel.sc@meta.data$Menstrual.Cycle))
+counts.prop.perc = group_by(prop, Var1) %>% mutate(percent = Freq/sum(Freq))
+
+aux = aggregate(prop$Freq, by=list(Category=prop$Var2), FUN=sum)
+aux$Var1 = "Total"
+colnames(aux) <- c("Var2", "Freq", "Var1")
+aux$percent = aux$Freq / sum(aux$Freq)
+counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
+
+p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
+  geom_bar(position="stack",stat = "identity", width=0.8) +
+  scale_fill_manual(name="Menstrual cycle", values = c("Follicular" = "orange", 
+                                                       "Luteal" = "red",
+                                                       "Hormone" = "blue")) +
+  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
+  geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
+  theme_set(theme_gray(base_size = bsize)) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.text.y = element_text(angle = 0, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "right")+
+  coord_flip()
+p1
+
+```
+
+## Figure 6-G
+
+```{r include=T, warning=F, message=F, fig.align='center'}
+
+.sel.sc = subset(sel.sc, subset = Major.Class %in% c("Endometrioma",
+                                                    "Endometriosis"))
+
+
+prop <- data.frame(table(.sel.sc@meta.data$Major.Class, .sel.sc@meta.data$Menstrual.Cycle))
+counts.prop.perc = group_by(prop, Var1) %>% mutate(percent = Freq/sum(Freq))
+
+aux = aggregate(prop$Freq, by=list(Category=prop$Var2), FUN=sum)
+aux$Var1 = "Total"
+colnames(aux) <- c("Var2", "Freq", "Var1")
+aux$percent = aux$Freq / sum(aux$Freq)
+counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
+
+p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
+  geom_bar(position="stack",stat = "identity", width=0.8) +
+  scale_fill_manual(name="Menstrual cycle", values = c("Follicular" = "orange", 
+                                                       "Luteal" = "red",
+                                                       "Hormone" = "blue")) +
+  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
+  geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
+  theme_set(theme_gray(base_size = bsize)) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.text.y = element_text(angle = 0, hjust = 1),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "right")+
+  coord_flip()
+p1
+
+```
+
+``` {r include=T, warning=F, message=F, fig.align='center', ig.height=12}
+
+endo.stroma = readRDS("rds/EnS_cells.rds")
+endo.epi = readRDS("rds/EnEpi_cells.rds")
+
+class = "endo_type_epi"
+deg.sample = read.delim("files/3F-DEG-analysis.cvs", sep = ",")
+
+deg.sample.filt = deg.sample[deg.sample$avg_log2FC > 0.5 & deg.sample$p_val_adj <= 0.05,]
+deg.sample.filt$cluster = paste0(class, "_", deg.sample.filt$cluster)
+deg.sample.comb = deg.sample.filt
+
+class = "endo_type_fibro"
+deg.sample = read.delim("files/6H-DEG-analysis.cvs", sep = ",")
+
+deg.sample.filt = deg.sample[deg.sample$avg_log2FC > 0.5 & deg.sample$p_val_adj <= 0.05,]
+deg.sample.filt$cluster = paste0(class, "_", deg.sample.filt$cluster)
+deg.sample.comb = rbind(deg.sample.comb, deg.sample.filt)
+
+sc.endo_type = merge(endo.stroma, endo.epi)
+sc.endo_type@meta.data$active.cluster[sc.endo_type@meta.data$active.cluster %in% c("Ciliated", "Glandular secretory", "IHH+ SPDEF+", "MUC5B+", "SOX9+ LGR5+")] <- "endo_type_epi"
+sc.endo_type@meta.data$active.cluster[sc.endo_type@meta.data$active.cluster %in% c("EnS_Proliferative", "EnS_Secretory")] <- "endo_type_fibro"
+sc.endo_type@meta.data$Major.Class =  paste0(sc.endo_type@meta.data$active.cluster, "_", sc.endo_type@meta.data$Major.Class)
+table(deg.sample.comb$cluster)
+
+
+dot.plot.data = DotPlot(sc.endo_type, features = unique(deg.sample.comb$gene), group.by = "Major.Class") +
+  coord_flip() +
+  scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b") +
+  theme(axis.text.x = element_text(angle = 90))
+
+dot.plot.data = dot.plot.data$data
+
+data.avg.exp.scaled = data.frame(row.names = unique(deg.sample.comb$gene))
+
+for (o in unique(deg.sample.comb$cluster)) {
+  dot.plot.data.filt = dot.plot.data[which(dot.plot.data$id == o),]
+  rownames(dot.plot.data.filt) <- dot.plot.data.filt$features.plot
+  data.avg.exp.scaled = cbind(data.avg.exp.scaled, dot.plot.data.filt[, 'avg.exp.scaled', drop=FALSE])
+}
+
+colnames(data.avg.exp.scaled) <- paste0(names(table(deg.sample.comb$cluster)),  " (n=", table(deg.sample.comb$cluster), ")")
+data.avg.exp.scaled <- data.avg.exp.scaled[, c("endo_type_epi_Eutopic Endometrium (n=37)", "endo_type_fibro_Eutopic Endometrium (n=57)",
+                                               "endo_type_epi_Endometriosis (n=52)", "endo_type_fibro_Endometriosis (n=64)",
+                                               "endo_type_epi_Endometrioma (n=78)", "endo_type_fibro_Endometrioma (n=51)")]
+
+
+hm = pheatmap(data.avg.exp.scaled, 
+              cluster_rows = T, 
+              cluster_cols = F, 
+              show_rownames = F, 
+              cutree_rows = 6, 
+              border_color = NA)
+
+df.row.annot = data.frame(sort(cutree(hm$tree_row, k=6)))
+colnames(df.row.annot) = "Cluster"
+df.row.annot$Cluster = as.character(df.row.annot$Cluster)
+cols <- colorRampPalette(brewer.pal(9, "Set1"))
+mycolors <- cols(length(unique(df.row.annot$Cluster)))
+names(mycolors) <- unique(df.row.annot$Cluster)
+mycolors <- list(mycolors = mycolors)
+
+hm <- pheatmap(data.avg.exp.scaled,
+         cluster_rows = T,
+         cluster_cols = F,
+         show_rownames = F,
+         cutree_rows = 6,
+         border_color = NA,
+         annotation_row = df.row.annot,
+         annotation_colors = mycolors)
+
+hm
+
+commom.endometrioma = data.avg.exp.scaled[, c('endo_type_epi_Endometrioma (n=78)', 'endo_type_fibro_Endometrioma (n=51)')] > 0
+c.endo.names = rownames(commom.endometrioma)[rowSums(commom.endometrioma) == 2]
+c.endo.names
+
+commom.endometrium = data.avg.exp.scaled[, c('endo_type_epi_Eutopic Endometrium (n=37)', 'endo_type_fibro_Eutopic Endometrium (n=57)')] > 0
+c.eutopic.names = rownames(commom.endometrium)[rowSums(commom.endometrium) == 2]
+c.eutopic.names
+
+commom.endometriosis = data.avg.exp.scaled[, c('endo_type_epi_Endometriosis (n=52)', 'endo_type_fibro_Endometriosis (n=64)')] > 0
+c.endometriosis.names = rownames(commom.endometriosis)[rowSums(commom.endometriosis) == 2]
+c.endometriosis.names
+
+sel.names = c(c.endo.names, c.eutopic.names, c.endometriosis.names)
+data.avg.exp.scaled.filt = data.avg.exp.scaled[sel.names,]
+
+hm = pheatmap(data.avg.exp.scaled.filt, cluster_rows = T, cluster_cols = F, show_rownames = F, cutree_rows = 3, border_color = NA)
+
+df.row.annot = data.frame(sort(cutree(hm$tree_row, k=3)))
+colnames(df.row.annot) = "Cluster"
+df.row.annot$Cluster = as.character(df.row.annot$Cluster)
+cols <- colorRampPalette(brewer.pal(9, "Set1"))
+mycolors <- cols(length(unique(df.row.annot$Cluster)))
+names(mycolors) <- unique(df.row.annot$Cluster)
+mycolors <- list(mycolors = mycolors)
+
+hm <- pheatmap(data.avg.exp.scaled.filt,
+               cluster_rows = T,
+               cluster_cols = F,
+               show_rownames = T,
+               cutree_rows = 3,
+               border_color = NA,
+               annotation_row = df.row.annot,
+               annotation_colors = mycolors)
+
+
+
+```

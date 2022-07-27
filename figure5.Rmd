@@ -1,0 +1,159 @@
+---
+title: "Figure 5"
+---
+
+
+```{r include = FALSE}
+rm(list = ls())
+
+library(ComplexHeatmap)
+library(circlize)
+library(Seurat)
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(plotly)
+library(cowplot)
+library(tidyr)
+library(corrplot)
+library('org.Hs.eg.db')
+library(ReactomePA)
+library("AnnotationDbi")
+library("clusterProfiler")
+
+```
+
+Load cohort annotation file and Epithelial cells Seurat object
+
+```{r include = T, eval=T, fig.align='center'}
+.sc = readRDS(file = "rds/epithelial.annotated.rds")
+
+sel.sc = subset(.sc, subset = active.cluster %in% c("Mesothelial (1)", 
+                                                    "Mesothelial (2)",
+                                                    "Mesothelial (3)"))
+
+sel.sc = subset(sel.sc, subset = Major.Class %in% c("Endometrioma",
+                                                    "Unaffected ovary",
+                                                    "Endometriosis",
+                                                    "No endometriosis detected"))
+
+
+sel.sc@meta.data <- droplevels(sel.sc@meta.data)
+
+prop.cells <- data.frame(table(sel.sc@meta.data$Major.Class))
+prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title="Number of cells in each Class", x ="Class", y = "Number of Cells")
+
+```
+
+## Figure 5-A
+
+``` {r include=T, message=F, warning=F, fig.align='center'}
+
+sel.sc <- FindNeighbors(sel.sc, dims = 1:20)
+sel.sc <- FindClusters(sel.sc, resolution = 0.5, verbose = F)
+sel.sc <- RunUMAP(sel.sc, dims = 1:20)
+pd = DimPlot(sel.sc, reduction = "umap", label = TRUE)
+pd
+
+pd = DimPlot(sel.sc, 
+             reduction = "umap", 
+             group.by = "Major.Class", 
+             label = F, 
+             cols = c("Endometrioma" = "#7b3294",
+                      "Eutopic Endometrium" = "#c2a5cf", 
+                      "Endometriosis" = "#d9f0d3", 
+                      "No endometriosis detected" = "#a6dba0",
+                      "Unaffected ovary" = "#008837"))
+pd
+
+
+```
+
+
+## Figure 5-B
+
+``` {r include=T, message=F, warning=F, fig.align='center'}
+
+feat.genes = c("CCN1", "CCL2", "GADD45A", "MIF")
+
+pf = FeaturePlot(sel.sc, features = feat.genes) &
+  scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b")
+pf
+
+
+```
+
+
+
+## Figure 5-C
+
+``` {r include=T, message=F, warning=F, fig.align='center'}
+
+Idents(object = sel.sc) <- sel.sc@meta.data$Major.Class
+markers.sel.sc = FindAllMarkers(sel.sc, test.use = "MAST",  verbose = TRUE)
+
+p.v = 0.05
+fc = 0.8
+markers.sel.sc$STATUS = "NOT.SIG"
+markers.sel.sc[markers.sel.sc$avg_log2FC < -fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Down"
+markers.sel.sc[markers.sel.sc$avg_log2FC > fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Up"
+
+c = "Endometrioma"
+sc.markers.filt = markers.sel.sc[markers.sel.sc$cluster == c,]
+nDEG = nrow(sc.markers.filt)
+genes = sc.markers.filt$gene[sc.markers.filt$cluster == c & sc.markers.filt$STATUS != "NOT.SIG"]
+
+vp = ggplot(sc.markers.filt, aes(x = avg_log2FC, y = -log10(p_val_adj))) +
+  geom_point(aes(color = STATUS), cex = 1.45) +
+  scale_color_manual(values = c("darkgreen", "grey", "red")) +
+  theme_bw(base_size = 15) + 
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  geom_text_repel(
+    data = sc.markers.filt[genes,],
+    aes(label = sc.markers.filt$gene[which(sc.markers.filt$gene %in% genes)]),
+    size = 5,
+    box.padding = unit(0.35, "lines"),
+    point.padding = unit(0.3, "lines")
+  ) +
+  labs(title = paste0("Cluster ", c, " (n=", nDEG, ")"))
+vp
+
+```
+
+
+```{r include=F}
+
+gs.epi <- lapply(unique(markers.sel.sc$cluster), function(x) {
+  print(x)
+  clu <- markers.sel.sc[markers.sel.sc$cluster == x,]
+  clu <- clu[clu$p_val_adj < 0.05 & clu$avg_log2FC > 0,]
+  symbols = clu$gene
+  IDs = mapIds(org.Hs.eg.db, symbols, 'ENTREZID', 'SYMBOL')
+  return(IDs)
+})
+
+names(gs.epi) <- as.character(unique(markers.sel.sc$cluster))
+res <- compareCluster(gs.epi, fun="enrichPathway")
+p <- clusterProfiler::dotplot(res, showCategory=10)
+
+```
+
+## Figure 3-D
+
+```{r include=T, warning=F, message=F, fig.width = 5, fig.height=12, fig.align='center'}
+res <- compareCluster(gs.epi, fun="enrichPathway")
+
+p + theme(axis.text.x=element_text(angle=90, hjust=1))
+
+```
+
