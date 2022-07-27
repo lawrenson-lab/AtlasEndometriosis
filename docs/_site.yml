@@ -1,0 +1,24 @@
+---
+title: "Home"
+author: "Marcos A. S. Fonseca"
+date: "May, 2021" 
+navbar:
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Figure 2"
+      href: figure2.html
+    - text: "Figure 3"
+      href: figure3.html
+    - text: "Figure 4"
+      href: figure4.html
+    - text: "Figure 5"
+      href: figure5.html
+    - text: "Figure 6"
+      href: figure6.html  
+    - text: "Figure 7"
+      href: figure7.html  
+    - text: "Figure 8"
+      href: figure8.html  
+
+---
