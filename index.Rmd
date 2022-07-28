@@ -1,5 +1,7 @@
 ---
 title: "Home"
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
 ---
 
 ## Introduction

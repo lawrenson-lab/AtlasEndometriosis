@@ -2,6 +2,8 @@
 title: "Home"
 author: "Marcos A. S. Fonseca"
 date: "May, 2021" 
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
 navbar:
   left:
     - text: "Home"
@@ -21,6 +23,6 @@ navbar:
     - text: "Figure 8"
       href: figure8.html  
   right:
-    - icon: fa-question fa-lg
-      href: https://example.com
+    - icon: 
+      href: http://lawrensonlab.com/
 ---
