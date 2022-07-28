@@ -1,9 +1,10 @@
 ---
-title: "Home"
+title: "menubar"
 author: "Marcos A. S. Fonseca"
-date: "May, 2021" 
+date: "July, 2022" 
 knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
+output_dir: docs
 navbar:
   left:
     - text: "Home"
@@ -22,7 +23,4 @@ navbar:
       href: figure7.html  
     - text: "Figure 8"
       href: figure8.html  
-  right:
-    - icon: 
-      href: http://lawrensonlab.com/
 ---
