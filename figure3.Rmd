@@ -1,5 +1,7 @@
 ---
 title: "Figure 2"
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
 ---
 
 
@@ -342,7 +344,7 @@ p <- clusterProfiler::dotplot(res, showCategory=10)
 
 ```
 
-## Figure 3-G
+## Figure 3-I
 
 ```{r include=T, warning=F, message=F, fig.width = 5, fig.height=10, fig.align='center'}
 res <- compareCluster(gs.epi, fun="enrichPathway")
@@ -390,7 +392,7 @@ ggplot(prop.cells, aes(Var1, Freq)) +
         labs(y = "Number of Cells")
 ```
 
-## Figure 3-I
+## Figure 3-G
 
 ```{r include=T, fig.align='center', message=F, warning=F, fig.width = 5, fig.height=8}
 
