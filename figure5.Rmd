@@ -148,7 +148,7 @@ p <- clusterProfiler::dotplot(res, showCategory=10)
 
 ```
 
-## Figure 3-D
+## Figure 5-D
 
 ```{r include=T, warning=F, message=F, fig.width = 5, fig.height=12, fig.align='center'}
 res <- compareCluster(gs.epi, fun="enrichPathway")
