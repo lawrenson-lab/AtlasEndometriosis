@@ -112,7 +112,7 @@ anno.class.obs = anno.class[,c("Patient.No.", "SampleName", "CominedSurgical", "
 ```{r include = T, eval=T, fig.align = 'center', fig.asp=.99}
 .sc = readRDS(file = "rds/epithelial.annotated.rds")
 
-gridExtra::grid.table(anno.class.obs)
+#gridExtra::grid.table(anno.class.obs)
 
 ```
 
