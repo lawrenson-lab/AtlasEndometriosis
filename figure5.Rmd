@@ -1,5 +1,7 @@
 ---
 title: "Figure 5"
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
 ---
 
 
@@ -157,3 +159,24 @@ p + theme(axis.text.x=element_text(angle=90, hjust=1))
 
 ```
 
+
+## Figure 5-E
+
+```{r include=T, warning=F, message=F, fig.width = 5, fig.height=5, fig.align='center'}
+aux.seurat = readRDS("rds/aux.seurat.rds")
+
+features <- c("CD74", "CCR2", "CXCR2", "CXCR4", "ACKR3")
+
+pd <- DotPlot(aux.seurat, assay = "RNA", features = features, group.by ="active.cluster")  +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust = 0.8, 
+                                   size = 12), 
+        axis.text.y = element_text(size = 12)) +
+  coord_flip() +
+  scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b")
+
+pd
+
+
+```
