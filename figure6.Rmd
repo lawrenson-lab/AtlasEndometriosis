@@ -118,7 +118,7 @@ pd
 
 ```
 
-``` {r include=T, message=F, eval=T,  warning=F, fig.align='center', fig.width = 8, fig.height=5}
+``` {r include=T, message=F, eval=T,  warning=F, fig.align='center', fig.width = 12, fig.height=8}
 img1_path = "plots/6E-DOTPLOT-markers.pdf"
 include_graphics(img1_path)
 
@@ -166,6 +166,11 @@ p1
 ``` {r include=T, eval=T,  message=F, warning=F, fig.align='center'}
 
 sel.sc = readRDS("rds/EnS_cells.rds")
+
+sel.sc = subset(sel.sc, subset = Major.Class %in% c("Endometrioma",
+                                                    "Eutopic Endometrium",
+                                                    "Endometriosis"))
+
 ```
 
 ``` {r include=T, eval=F,  message=F, warning=F, fig.align='center'}
@@ -351,7 +356,7 @@ p1
 
 ```
 
-``` {r include=T, warning=F, message=F, fig.align='center', ig.height=12}
+``` {r include=T, warning=F, message=F, fig.align='center', fig.height=18}
 
 endo.stroma = readRDS("rds/EnS_cells.rds")
 endo.epi = readRDS("rds/EnEpi_cells.rds")
