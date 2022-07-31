@@ -1,5 +1,7 @@
 ---
 title: "Figure 4"
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
 ---
 
 
@@ -98,6 +100,7 @@ vp
 
 
 ```
+
 ## Figure 4-E
 
 
@@ -142,18 +145,16 @@ vp
 ```{r include = T, eval=T,  fig.align='center'}
 
 aux.seurat = readRDS("rds/aux.seurat.rds")
- 
-head(aux.seurat@meta.data)
-table(aux.seurat@meta.data$active.cluster)
 
+aux.seurat@meta.data$id.cells = rownames(aux.seurat@meta.data)
+aux.seurat@meta.data$selected.cells = "No"
+aux.seurat@meta.data$subcluster.name = NA
 
 aux.seurat.endo = subset(aux.seurat, subset = active.cluster %in% "Endothelial cells")
 aux.seurat.endo <- FindNeighbors(aux.seurat.endo, dims = 1:20)
 aux.seurat.endo <- FindClusters(aux.seurat.endo, resolution = 0.5)
 aux.seurat.endo <- RunUMAP(aux.seurat.endo, dims = 1:20)
 
-
-aux.seurat.endo <- readRDS("rds/")
 DimPlot(aux.seurat.endo, reduction = "umap", label = T)
 
 prop.cells <- data.frame(table(aux.seurat.endo@meta.data$seurat_clusters))
@@ -169,65 +170,161 @@ px<- ggplot(prop.cells, aes(Var1, Freq)) +
   labs(title="Number of cells in each Class", x ="Class", y = "Number of Cells")
 px
 
-bsize = 14
-counts.prop = data.frame(table(aux.seurat.endo@meta.data$Major.Class, aux.seurat.endo@meta.data$seurat_clusters))
-counts.prop.perc = group_by(counts.prop, Var2) %>% mutate(percent = Freq/sum(Freq))
+
+id.cells.annot = rownames(aux.seurat.endo@meta.data)
+aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$id.cells %in% id.cells.annot] = "Yes"
+aux.seurat@meta.data$subcluster.name[match(rownames(aux.seurat.endo@meta.data), aux.seurat@meta.data$id.cells)] = as.character(aux.seurat.endo@meta.data$seurat_clusters)
+table(aux.seurat@meta.data$selected.cells)
+table(aux.seurat@meta.data$subcluster.name)
+
+aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Epithelial cells"] = "Yes"
+aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Mesenchymal cells"] = "Yes"
+aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Mast cells"] = "Yes"
+aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Myeloid cells"] = "Yes"
+aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "T/NK cells"] = "Yes"
+aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "B/Plasma cells"] = "Yes"
+table(aux.seurat@meta.data$selected.cells)
+
+sc.selected = subset(aux.seurat, subset = selected.cells == "Yes")
+sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "Mesenchymal cells"] = "Mesenchymal cells"
+sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "Epithelial cells"] = "Epithelial cells"
+sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "Mast cells"] = "Mast cells"
+sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "Myeloid cells"] = "Myeloid cells"
+sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "T/NK cells"] = "T/NK cells"
+sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "B/Plasma cells"] = "B/Plasma cells"
+table(sc.selected@meta.data$active.cluster)
+table(sc.selected@meta.data$subcluster.name)
+
+
+
+# class = "ARID1A_Status"
+# markers = c("ARID1A")
+# DimPlot(aux.seurat.endo, reduction = "umap")
+# data.table.filt = data.table[which(data.table$ARID1A != "NP"), ]
+# 
+# sc.sel.filt = subset(aux.seurat.endo, subset = SampleName %in% data.table.filt$SampleName)
+# 
+# sc.sel.filt <- AddMetaData(sc.sel.filt, metadata=NA, col.name="Status")
+# sc.sel.filt@meta.data$Status[which(sc.sel.filt@meta.data$SampleName %in% data.table.filt$SampleName[data.table.filt$ARID1A == "Positive"])] <- "Positive"
+# sc.sel.filt@meta.data$Status[which(sc.sel.filt@meta.data$SampleName %in% data.table.filt$SampleName[data.table.filt$ARID1A %in% c("Heterogenous")])] <- "Heterogenous"
+# 
+# 
+# head(data.table)
+.data.table = data.table[data.table$ARID1A %in% c("Positive", "Heterogenous"),]
+
+sel.endo = subset(aux.seurat.endo, subset = SampleName %in% .data.table$SampleName)
+
+table(Idents(sel.endo))
+#DimPlot(sel.endo, group.by = "SampleName", reduction = "umap")
+
+sel.endo@meta.data$ARID1A_status = NA
+
+for (i in 1:nrow(.data.table)) {
+  sample = .data.table$SampleName[i]
+  sel.endo@meta.data$ARID1A_status[sel.endo@meta.data$SampleName == sample] <- .data.table$ARID1A[i]
+}
+
+table(sel.endo@meta.data$ARID1A_status)
+
+
+prop <- data.frame(table(sel.endo@meta.data$seurat_clusters, sel.endo@meta.data$ARID1A_status))
+counts.prop.perc = group_by(prop, Var1) %>% mutate(percent = Freq/sum(Freq))
 head(counts.prop.perc)
 
-aux = aggregate(counts.prop$Freq, by=list(Category=counts.prop$Var1), FUN=sum)
-aux$Var2 = "Total"
-colnames(aux) <- c("Var1", "Freq", "Var2")
+aux = aggregate(prop$Freq, by=list(Category=prop$Var2), FUN=sum)
+aux$Var1 = "Total"
+colnames(aux) <- c("Var2", "Freq", "Var1")
 aux$percent = aux$Freq / sum(aux$Freq)
 counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
 
-p1 <- ggplot(counts.prop.perc, aes(x = Var2, y = percent, fill = Var1, group=Var2)) + 
+p1 <- ggplot(counts.prop.perc, aes(x = reorder(Var1, percent), y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
   geom_bar(position="stack",stat = "identity", width=0.8) +
-  scale_fill_manual(name="Class", values = c("Endometrioma" = "#7b3294", 
-                                             "Eutopic Endometrium" = "#c2a5cf", 
-                                             "Endometriosis" = "#d9f0d3", 
-                                             "No endometriosis detected" = "#a6dba0",
-                                             "Unaffected ovary" = "#008837")) +
-  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var2))) +
-  coord_flip() +
-  theme_set(theme_gray(base_size = bsize)) +
+  scale_fill_manual(name="ARID1A status", values = c("Positive" = "#4daf4a", 
+                                                   "Heterogenous" = "#666666")) +
+  scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
+  geom_text(data=subset(counts.prop.perc,Freq != 0), position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
+  theme_set(theme_gray(base_size = 16)) +
   theme(plot.title = element_text(hjust = 0.5),
         axis.text.x = element_text(angle = 270, hjust = 1),
-        axis.text.y = element_text(angle = 0, hjust = 1),
+        axis.text.y = element_text(angle = 270, hjust = 1),
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
-        legend.position = "none")
+        legend.position = "right")
 p1
 
 
+```
 
-# gene.feat <- c("VEGFA", "VEGFC", "VEGFD", "CCBE1", "FGF2", "SEMA3A")
-# 
-# p1 <- DotPlot(sc.selected, assay = "RNA", features = unique(gene.feat), group.by = "Status") +
-#   theme(axis.text.x = element_text(angle = 90)) +
-#   coord_flip() +
-#   scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b")
-# p1
-# 
-# pdf("plots/review/4k-ARID1A-status-genes-interest.pdf", height = 4, width = 4)
-# p1
-# dev.off()
-# 
-# 
-# 
-# 
-# gene.feat <- c("PROX1", "PDPN", "LYVE1", "FLT4")
-# 
-# aux.seurat.endo@meta.data$plot.clusters = "Remaining"
-# #levels(aux.seurat.endo@meta.data$plot.clusters) <- c("Remaining", levels(aux.seurat.endo@meta.data$plot.clusters))
-# aux.seurat.endo@meta.data$plot.clusters[aux.seurat.endo@meta.data$seurat_clusters == "8"] = "8"
-# aux.seurat.endo@meta.data$plot.clusters[aux.seurat.endo@meta.data$seurat_clusters == "12"] = "12"
-# 
-# p1 <- DotPlot(aux.seurat.endo, assay = "RNA", features = unique(gene.feat), group.by = "plot.clusters") +
-#   theme(axis.text.x = element_text(angle = 90)) +
-#   coord_flip() +
-#   scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b")
-# p1
+## Figure 4-I
+
+
+```{r include = T, eval=T,  fig.align='center'}
+
+table.counts = prop %>% 
+  spread(Var1, Freq)
+rownames(table.counts) <- table.counts$Var2
+table.counts = table.counts[,-1]
+
+test <- chisq.test(table.counts)
+test
+corrplot(test$residuals, is.cor = FALSE, method = 'color')
+
+
+```
+
+## Figure 4-J
+
+```{r include = T, eval=T,  fig.align='center'}
+
+gene.feat <- c("PROX1", "PDPN", "LYVE1", "FLT4")
+
+aux.seurat.endo@meta.data$plot.clusters = "Remaining"
+aux.seurat.endo@meta.data$plot.clusters[aux.seurat.endo@meta.data$seurat_clusters == "8"] = "8"
+aux.seurat.endo@meta.data$plot.clusters[aux.seurat.endo@meta.data$seurat_clusters == "12"] = "12"
+
+p1 <- DotPlot(aux.seurat.endo, assay = "RNA", features = unique(gene.feat), group.by = "plot.clusters") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  coord_flip() +
+  scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b")
+p1
 
 ```
 
 
+## Figure 4-K
+
+
+```{r include = T, eval=T,  fig.align='center'}
+
+.sc.epi = readRDS(file = "rds/epithelial.annotated.rds")
+
+.sc.epi <- AddMetaData(.sc.epi, metadata=NA, col.name="Status")
+
+.sc.epi@meta.data$Status[which(.sc.epi@meta.data$SampleName %in% .data.table$SampleName[.data.table$ARID1A == "Positive"])] <- "Positive"
+
+.sc.epi@meta.data$Status[which(.sc.epi@meta.data$SampleName %in% .data.table$SampleName[.data.table$ARID1A %in% c("Heterogenous")])] <- "Heterogenous"
+
+
+sc.sel.filt = subset(.sc.epi, subset = SampleName %in% .data.table$SampleName)
+
+table(.sc.epi@meta.data$active.cluster)
+.sc.epi@meta.data$selected.cells = "No"
+.sc.epi@meta.data$id.cells = rownames(.sc.epi@meta.data)
+ 
+id.cells.annot = rownames(sc.sel.filt@meta.data)
+.sc.epi@meta.data$selected.cells[match(id.cells.annot, .sc.epi@meta.data$id.cells)] = "Yes"
+table(.sc.epi@meta.data$selected.cells)
+sc.selected = subset(.sc.epi, subset = selected.cells == "Yes")
+sc.selected@meta.data = droplevels(sc.selected@meta.data)
+table(sc.selected@meta.data$active.cluster)
+
+gene.feat <- c("VEGFA", "VEGFC", "VEGFD", "CCBE1", "FGF2", "SEMA3A")
+
+p1 <- DotPlot(sc.selected, assay = "RNA", features = unique(gene.feat), group.by = "Status") +
+    theme(axis.text.x = element_text(angle = 90)) +
+    coord_flip() +
+    scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b")
+p1
+
+
+``` 
