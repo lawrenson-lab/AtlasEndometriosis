@@ -1,5 +1,8 @@
 ---
 title: "Figure 8"
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
+
 --- 
 
 
