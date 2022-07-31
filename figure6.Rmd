@@ -356,6 +356,8 @@ p1
 
 ```
 
+## Figure 6-H
+
 ``` {r include=T, warning=F, message=F, fig.align='center', fig.height=18}
 
 endo.stroma = readRDS("rds/EnS_cells.rds")
