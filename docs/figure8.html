@@ -440,7 +440,7 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="index.html">Main</a>
 </li>
 <li>
   <a href="figure2.html">Figure 2</a>
@@ -480,6 +480,7 @@ $(document).ready(function () {
 </div>
 
 
+<p>Load Seurat object containing Endometrial-type epithelial cells</p>
 <pre class="r"><code>sc = readRDS(&quot;rds/EnEpi_cells.rds&quot;)
 
 prop.cells = data.frame(table(sc@meta.data$active.cluster))

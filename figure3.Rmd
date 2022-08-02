@@ -24,11 +24,10 @@ library("clusterProfiler")
 
 ```
 
-Load cohort annotation file and Epithelial cells Seurat object
+Load cohort information and Seurat object containing all annotated Epithelial cells
 
 ```{r include = T, eval=T}
 .sc = readRDS(file = "rds/epithelial.annotated.rds")
-
 .sc@active.ident <- factor(.sc@active.ident,
                           levels=c("Mesothelial (3)",
                                    "Mesothelial (2)",
@@ -66,8 +65,8 @@ levels(.sc@meta.data$active.cluster) <-c("SOX9+ LGR5+",
 DimPlot(object = .sc, pt.size = 0.1, group.by ="active.cluster", label = F, raster=FALSE)
 ```
 
-
 ## Figure 3-C
+
 ```{r include = T, eval=T, fig.align = 'center'}
 prop.cells <- data.frame(table(Idents(.sc)))
 prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
@@ -99,7 +98,6 @@ p1 <- ggplot(counts.prop.perc, aes(x = Var2, y = percent, fill = Var1, group=Var
                                                    "Endometriosis" = "#d9f0d3", 
                                                    "No endometriosis detected" = "#a6dba0",
                                                    "Unaffected ovary" = "#008837")) +
-        #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var2))) +
         coord_flip() +
         theme_set(theme_gray(base_size = bsize)) +
         theme(plot.title = element_text(hjust = 0.5),
@@ -145,7 +143,6 @@ table.gene.markers <- rbind(table.gene.markers,
 
 pd <- DotPlot(object = .sc, assay = "RNA", features = rev(unique(table.gene.markers$Gene)))+
         theme(axis.text.x = element_text(angle = 90)) +
-        #coord_flip() +
         scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b") 
 pd
 ```
@@ -241,10 +238,8 @@ counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
 p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
         geom_bar(position="stack",stat = "identity", width=0.8) +
         scale_fill_manual(name="Menstrual cycle", values = c("Follicular" = "orange", 
-                                                             #"Hormone" = "blue"
                                                              "Luteal" = "red"
                                                              )) +
-        #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
         geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
         theme_set(theme_gray(base_size = bsize)) +
         theme(plot.title = element_text(hjust = 0.5),
@@ -278,10 +273,8 @@ counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
 p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
         geom_bar(position="stack",stat = "identity", width=0.8) +
         scale_fill_manual(name="Menstrual cycle", values = c("Follicular" = "orange", 
-                                                             #"Hormone" = "blue",
                                                              "Luteal" = "red"
                                                              )) +
-        #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
         geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
         theme_set(theme_gray(base_size = bsize)) +
         theme(plot.title = element_text(hjust = 0.5),
@@ -309,12 +302,10 @@ markers.sel.sc$STATUS = "NOT.SIG"
 markers.sel.sc[markers.sel.sc$avg_log2FC < -fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Down"
 markers.sel.sc[markers.sel.sc$avg_log2FC > fc & markers.sel.sc$p_val_adj < p.v, ]$STATUS = "Up"
 
-
 features.deg = NULL
 for (o in unique(markers.sel.sc$cluster)) {
         features.deg = c(features.deg, head(markers.sel.sc$gene[markers.sel.sc$cluster == o  & markers.sel.sc$STATUS == "Up"], 10))
 }
-
 
 pd <- DotPlot(sel.sc, features = unique(features.deg)) +
         scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b") +
@@ -410,7 +401,6 @@ features.deg = NULL
 for (o in unique(markers.sel.sc$cluster)) {
         features.deg = c(features.deg, head(markers.sel.sc$gene[markers.sel.sc$cluster == o  & markers.sel.sc$STATUS == "Up"], 10))
 }
-
 
 pd <- DotPlot(sel.sc, features = unique(features.deg)) +
         scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b") +

@@ -25,7 +25,7 @@ library("clusterProfiler")
 
 ```
 
-Load cohort annotation file and Epithelial cells Seurat object
+Load Seurat object containing all annotated Epithelial cells and select mesothelial cells
 
 ```{r include = T, eval=T, fig.align='center'}
 .sc = readRDS(file = "rds/epithelial.annotated.rds")
@@ -93,7 +93,6 @@ pf
 
 
 ```
-
 
 
 ## Figure 5-C

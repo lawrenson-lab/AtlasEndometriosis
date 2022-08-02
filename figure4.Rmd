@@ -25,6 +25,7 @@ library(reshape2)
 library(ggrepel)
 
 ```
+Load cohort mutation information
 
 ## Figure 4-A
 
@@ -140,9 +141,9 @@ vp
 
 ```
 
+Loading Seurat object and selecting Endothelial cells
 
-
-```{r include = T, eval=T,  fig.align='center'}
+```{r include = T, eval=T,  fig.align='center', message=F, warning=F, fig.width=9}
 
 aux.seurat = readRDS("rds/aux.seurat.rds")
 
@@ -174,8 +175,6 @@ px
 id.cells.annot = rownames(aux.seurat.endo@meta.data)
 aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$id.cells %in% id.cells.annot] = "Yes"
 aux.seurat@meta.data$subcluster.name[match(rownames(aux.seurat.endo@meta.data), aux.seurat@meta.data$id.cells)] = as.character(aux.seurat.endo@meta.data$seurat_clusters)
-table(aux.seurat@meta.data$selected.cells)
-table(aux.seurat@meta.data$subcluster.name)
 
 aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Epithelial cells"] = "Yes"
 aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Mesenchymal cells"] = "Yes"
@@ -183,7 +182,6 @@ aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Mast
 aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "Myeloid cells"] = "Yes"
 aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "T/NK cells"] = "Yes"
 aux.seurat@meta.data$selected.cells[aux.seurat@meta.data$active.cluster == "B/Plasma cells"] = "Yes"
-table(aux.seurat@meta.data$selected.cells)
 
 sc.selected = subset(aux.seurat, subset = selected.cells == "Yes")
 sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "Mesenchymal cells"] = "Mesenchymal cells"
@@ -192,44 +190,19 @@ sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "M
 sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "Myeloid cells"] = "Myeloid cells"
 sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "T/NK cells"] = "T/NK cells"
 sc.selected@meta.data$subcluster.name[sc.selected@meta.data$active.cluster == "B/Plasma cells"] = "B/Plasma cells"
-table(sc.selected@meta.data$active.cluster)
-table(sc.selected@meta.data$subcluster.name)
 
-
-
-# class = "ARID1A_Status"
-# markers = c("ARID1A")
-# DimPlot(aux.seurat.endo, reduction = "umap")
-# data.table.filt = data.table[which(data.table$ARID1A != "NP"), ]
-# 
-# sc.sel.filt = subset(aux.seurat.endo, subset = SampleName %in% data.table.filt$SampleName)
-# 
-# sc.sel.filt <- AddMetaData(sc.sel.filt, metadata=NA, col.name="Status")
-# sc.sel.filt@meta.data$Status[which(sc.sel.filt@meta.data$SampleName %in% data.table.filt$SampleName[data.table.filt$ARID1A == "Positive"])] <- "Positive"
-# sc.sel.filt@meta.data$Status[which(sc.sel.filt@meta.data$SampleName %in% data.table.filt$SampleName[data.table.filt$ARID1A %in% c("Heterogenous")])] <- "Heterogenous"
-# 
-# 
-# head(data.table)
 .data.table = data.table[data.table$ARID1A %in% c("Positive", "Heterogenous"),]
 
 sel.endo = subset(aux.seurat.endo, subset = SampleName %in% .data.table$SampleName)
 
-table(Idents(sel.endo))
-#DimPlot(sel.endo, group.by = "SampleName", reduction = "umap")
-
 sel.endo@meta.data$ARID1A_status = NA
-
 for (i in 1:nrow(.data.table)) {
   sample = .data.table$SampleName[i]
   sel.endo@meta.data$ARID1A_status[sel.endo@meta.data$SampleName == sample] <- .data.table$ARID1A[i]
 }
 
-table(sel.endo@meta.data$ARID1A_status)
-
-
 prop <- data.frame(table(sel.endo@meta.data$seurat_clusters, sel.endo@meta.data$ARID1A_status))
 counts.prop.perc = group_by(prop, Var1) %>% mutate(percent = Freq/sum(Freq))
-head(counts.prop.perc)
 
 aux = aggregate(prop$Freq, by=list(Category=prop$Var2), FUN=sum)
 aux$Var1 = "Total"
@@ -237,7 +210,7 @@ colnames(aux) <- c("Var2", "Freq", "Var1")
 aux$percent = aux$Freq / sum(aux$Freq)
 counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
 
-p1 <- ggplot(counts.prop.perc, aes(x = reorder(Var1, percent), y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
+p1 <- ggplot(counts.prop.perc, aes(x = reorder(Var1, percent), y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 2))) + 
   geom_bar(position="stack",stat = "identity", width=0.8) +
   scale_fill_manual(name="ARID1A status", values = c("Positive" = "#4daf4a", 
                                                    "Heterogenous" = "#666666")) +
@@ -258,7 +231,7 @@ p1
 ## Figure 4-I
 
 
-```{r include = T, eval=T,  fig.align='center'}
+```{r include = T, eval=T,  fig.align='center', warning=F}
 
 table.counts = prop %>% 
   spread(Var1, Freq)
@@ -266,7 +239,6 @@ rownames(table.counts) <- table.counts$Var2
 table.counts = table.counts[,-1]
 
 test <- chisq.test(table.counts)
-test
 corrplot(test$residuals, is.cor = FALSE, method = 'color')
 
 
@@ -294,7 +266,7 @@ p1
 ## Figure 4-K
 
 
-```{r include = T, eval=T,  fig.align='center'}
+```{r include = T, eval=T,  fig.align='center', warning=F}
 
 .sc.epi = readRDS(file = "rds/epithelial.annotated.rds")
 
@@ -304,19 +276,15 @@ p1
 
 .sc.epi@meta.data$Status[which(.sc.epi@meta.data$SampleName %in% .data.table$SampleName[.data.table$ARID1A %in% c("Heterogenous")])] <- "Heterogenous"
 
-
 sc.sel.filt = subset(.sc.epi, subset = SampleName %in% .data.table$SampleName)
 
-table(.sc.epi@meta.data$active.cluster)
 .sc.epi@meta.data$selected.cells = "No"
 .sc.epi@meta.data$id.cells = rownames(.sc.epi@meta.data)
  
 id.cells.annot = rownames(sc.sel.filt@meta.data)
 .sc.epi@meta.data$selected.cells[match(id.cells.annot, .sc.epi@meta.data$id.cells)] = "Yes"
-table(.sc.epi@meta.data$selected.cells)
 sc.selected = subset(.sc.epi, subset = selected.cells == "Yes")
 sc.selected@meta.data = droplevels(sc.selected@meta.data)
-table(sc.selected@meta.data$active.cluster)
 
 gene.feat <- c("VEGFA", "VEGFC", "VEGFD", "CCBE1", "FGF2", "SEMA3A")
 

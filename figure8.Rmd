@@ -26,6 +26,7 @@ library(ComplexHeatmap)
 
 ```
 
+Load Seurat object containing Endometrial-type epithelial cells
 
 ```{r include = T, eval=T, message=F, warning=F}
 sc = readRDS("rds/EnEpi_cells.rds")

@@ -54,10 +54,9 @@ classsification = classsification[-which(classsification$SampleName == "BEME228_
 anno.class = .anno[which(.anno$SampleName %in% classsification$SampleName),]
 anno.class = anno.class[-which(anno.class$SampleName %in% c("S19259_BC", "S19286_CF")),]
 anno.class$CominedSurgical = classsification$Depth.KW[match(anno.class$SampleName, classsification$SampleName)]
-#anno.class = anno.class[-which(is.na(anno.class$Patient.No.)),]
 anno.class[, c("Patient.No.", "SampleName", "CominedSurgical")]
 
-## annotation adjustments 
+
 anno.class$CominedSurgical[anno.class$SampleName == "S19225_D"] <- "Deep"
 
 anno.class$Fibrosis[anno.class$SampleName == "S19286_AE"] <- "moderate"
@@ -111,8 +110,6 @@ anno.class.obs = anno.class[,c("Patient.No.", "SampleName", "CominedSurgical", "
 
 ```{r include = T, eval=T, fig.align = 'center', fig.asp=.99}
 .sc = readRDS(file = "rds/epithelial.annotated.rds")
-
-#gridExtra::grid.table(anno.class.obs)
 
 ```
 

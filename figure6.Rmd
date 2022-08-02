@@ -146,7 +146,6 @@ p1 <- ggplot(counts.prop.perc, aes(x = Var2, y = percent, fill = Var1, group=Var
                                              "Endometriosis" = "#d9f0d3", 
                                              "No endometriosis detected" = "#a6dba0",
                                              "Unaffected ovary" = "#008837")) +
-  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var2))) +
   coord_flip() +
   theme_set(theme_gray(base_size = bsize)) +
   theme(plot.title = element_text(hjust = 0.5),
@@ -306,7 +305,6 @@ p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = s
   scale_fill_manual(name="Menstrual cycle", values = c("Follicular" = "orange", 
                                                        "Luteal" = "red",
                                                        "Hormone" = "blue")) +
-  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
   geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
   theme_set(theme_gray(base_size = bsize)) +
   theme(plot.title = element_text(hjust = 0.5),
@@ -342,7 +340,6 @@ p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = s
   scale_fill_manual(name="Menstrual cycle", values = c("Follicular" = "orange",
                                                        "Luteal" = "red",
                                                        "Hormone" = "blue")) +
-  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
   geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
   theme_set(theme_gray(base_size = bsize)) +
   theme(plot.title = element_text(hjust = 0.5),

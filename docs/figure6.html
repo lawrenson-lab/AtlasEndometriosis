@@ -440,7 +440,7 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="index.html">Main</a>
 </li>
 <li>
   <a href="figure2.html">Figure 2</a>
@@ -578,7 +578,6 @@ p1 &lt;- ggplot(counts.prop.perc, aes(x = Var2, y = percent, fill = Var1, group=
                                              &quot;Endometriosis&quot; = &quot;#d9f0d3&quot;, 
                                              &quot;No endometriosis detected&quot; = &quot;#a6dba0&quot;,
                                              &quot;Unaffected ovary&quot; = &quot;#008837&quot;)) +
-  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var2))) +
   coord_flip() +
   theme_set(theme_gray(base_size = bsize)) +
   theme(plot.title = element_text(hjust = 0.5),
@@ -718,7 +717,6 @@ p1 &lt;- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label 
   scale_fill_manual(name=&quot;Menstrual cycle&quot;, values = c(&quot;Follicular&quot; = &quot;orange&quot;, 
                                                        &quot;Luteal&quot; = &quot;red&quot;,
                                                        &quot;Hormone&quot; = &quot;blue&quot;)) +
-  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
   geom_text(position = position_stack(vjust = 0.5), size = 4, color = &quot;#ffffff&quot;) +
   theme_set(theme_gray(base_size = bsize)) +
   theme(plot.title = element_text(hjust = 0.5),
@@ -751,7 +749,6 @@ p1 &lt;- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label 
   scale_fill_manual(name=&quot;Menstrual cycle&quot;, values = c(&quot;Follicular&quot; = &quot;orange&quot;,
                                                        &quot;Luteal&quot; = &quot;red&quot;,
                                                        &quot;Hormone&quot; = &quot;blue&quot;)) +
-  #scale_x_discrete(limits = rev(levels(counts.prop.perc$Var1))) +
   geom_text(position = position_stack(vjust = 0.5), size = 4, color = &quot;#ffffff&quot;) +
   theme_set(theme_gray(base_size = bsize)) +
   theme(plot.title = element_text(hjust = 0.5),

@@ -7,7 +7,7 @@ knit: (function(inputFile, encoding) {
 output_dir: docs
 navbar:
   left:
-    - text: "Home"
+    - text: "Main"
       href: index.html
     - text: "Figure 2"
       href: figure2.html
