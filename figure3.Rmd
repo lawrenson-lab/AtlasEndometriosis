@@ -241,7 +241,7 @@ p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = s
                                                              "Luteal" = "red"
                                                              )) +
         geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
-        theme_set(theme_gray(base_size = bsize)) +
+        theme_set(theme_classic(base_size = bsize)) +
         theme(plot.title = element_text(hjust = 0.5),
               axis.text.x = element_text(angle = 90, hjust = 1),
               axis.text.y = element_text(angle = 0, hjust = 1),

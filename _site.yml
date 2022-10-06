@@ -25,5 +25,6 @@ navbar:
       href: figure8.html  
     - text: "Extended Figure 1"
       href: extended_figure1.html  
-    
+    - text: "Extended Figure 2"
+      href: extended_figure2.html  
 ---

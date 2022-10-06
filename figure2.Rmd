@@ -23,6 +23,7 @@ library("AnnotationDbi")
 library("clusterProfiler")
 library(Seurat)
 library(SeuratDisk)
+library(plotly)
 
 ```
 
@@ -45,7 +46,7 @@ aux.seurat <- readRDS("rds/aux.seurat.rds")
 
 ```
 
-## Figure 2-A
+## Figure 2-a
 
 ```{r include = T, eval=T, fig.align = 'center', fig.height=4, fig.width=13}
 
@@ -64,33 +65,45 @@ p4 = DimPlot(aux.seurat,
 p4
 ```
 
-## Figure 2-B
 
-```{r include = T, eval=T, fig.align = 'center', fig.width=12, fig.height=8}
 
-p4 = DimPlot(object = aux.seurat, 
-             pt.size = 0.1, 
-             raster=FALSE, 
-             label = T)
-p4
-
-```
-
-## Figure 2-C
+## Figure 2-b
 
 ```{r include = T, eval=T, fig.align = 'center', fig.height=6, fig.width=8}
-
+cluster.cols = c("#9e0142", "#d53e48", "#f46d43", "#fdae61", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd")
 p4 = DimPlot(object = aux.seurat, 
              pt.size = 0.1, 
              raster=FALSE, 
              group.by = "active.cluster",
+             cols = cluster.cols,
              label = T)
 p4
 
 ```
 
+## Figure 3-c
 
-## Figure 3-E
+```{r include = T, eval=T, fig.align = 'center', fig.height=6, fig.width=8}
+umap_1 <- aux.seurat[["umap"]]@cell.embeddings[,1]
+umap_2 <- aux.seurat[["umap"]]@cell.embeddings[,2]
+umap_3 <- aux.seurat[["umap"]]@cell.embeddings[,3]
+
+plot.data <- FetchData(object = aux.seurat, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "active.cluster"))
+plot.data$label <- paste(rownames(plot.data))
+
+plot_ly(data = plot.data, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~active.cluster, 
+        colors = cluster.cols,
+        type = "scatter3d", 
+        mode = "markers", 
+        marker = list(size = 2, width=1),
+        text=~active.cluster,
+        hoverinfo="text") 
+
+```
+
+## Figure 3-d
 
 ```{r include = T, eval=T, fig.width = 10, fig.asp = .62, message=F, warning=FALSE}
 table.gene.markers <- data.frame(Gene=c("DCN", "COL11A1", "PDGFRA","PDGFRB"), Cell="Mesenchymal cells")
@@ -110,7 +123,7 @@ p
 
 ```
 
-## Figure 3-F
+## Figure 3-e
 
 ```{r include = T, eval=T, fig.align = 'center', warning=F, message=F}
 
@@ -238,7 +251,54 @@ pd
 
 ```
 
-## Figure 3-H
+## Figure 3-f
+
+```{r include=T, warning=F, message=F, fig.width = 7, fig.height=5, fig.align='center'}
+
+table.class.cell = table(aux.seurat@meta.data$active.cluster, aux.seurat@meta.data$Major.Class)
+table.class.cell.perc = table.class.cell/rowSums(table.class.cell)
+
+obs.class.perc = table(aux.seurat@meta.data$Major.Class)/length(aux.seurat@meta.data$Major.Class)
+table.fc = table.class.cell
+table.fc = is.na(table.fc)
+
+for (class in colnames(table.class.cell.perc)) {
+        for (cell.type in rownames(table.class.cell.perc)) {
+                expected = table.class.cell.perc[cell.type, class]
+                obs = obs.class.perc[class]
+                if (obs > expected) {
+                        ratio = -(obs/expected)
+                } else {
+                        ratio = expected/obs
+                }
+                #ratio = expected/obs
+                
+                table.fc[cell.type, class] = ratio
+        }
+}
+
+
+quantile_breaks <- function(xs, n = 10) {
+        breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
+        breaks[!duplicated(breaks)]
+}
+mat_breaks <- quantile_breaks(table.fc, n = 11)
+
+table.fc = table.fc[,c("Endometrioma", "Endometriosis", "No endometriosis detected", "Eutopic Endometrium", "Unaffected ovary")]
+
+pheatmap(t(table.fc), 
+         display_numbers = signif(t(table.fc), 3),
+         color             = colorRampPalette(c("#81B8D5", "white", "#E37F65"))(10),
+         breaks            = mat_breaks,
+         cluster_rows      = F,
+         cluster_cols      = F,
+         fontsize          = 14)
+
+
+
+```
+
+## Figure 3-g
 
 ``` {r include=T, warning=FALSE, fig.align = 'center', fig.width = 13, fig.height=15}
 
@@ -368,7 +428,7 @@ p <- ggplot(data=df_out, aes(x = PC1, y = PC4, color= Class)) +
 p
 ```
 
-## Figure 3-G
+## Figure 3-h
 
 ```{r include = T, fig.align='center', message=F, warning=F, fig.width = 13, fig.height=10}
 
@@ -438,52 +498,6 @@ draw(ht1, heatmap_legend_side = "left", annotation_legend_side = "right")
 
 ```
 
-## Figure 3-I
-
-```{r include=T, warning=F, message=F, fig.width = 7, fig.height=5, fig.align='center'}
-
-table.class.cell = table(aux.seurat@meta.data$active.cluster, aux.seurat@meta.data$Major.Class)
-table.class.cell.perc = table.class.cell/rowSums(table.class.cell)
-
-obs.class.perc = table(aux.seurat@meta.data$Major.Class)/length(aux.seurat@meta.data$Major.Class)
-table.fc = table.class.cell
-table.fc = is.na(table.fc)
-
-for (class in colnames(table.class.cell.perc)) {
-        for (cell.type in rownames(table.class.cell.perc)) {
-                expected = table.class.cell.perc[cell.type, class]
-                obs = obs.class.perc[class]
-                if (obs > expected) {
-                        ratio = -(obs/expected)
-                } else {
-                        ratio = expected/obs
-                }
-                #ratio = expected/obs
-                
-                table.fc[cell.type, class] = ratio
-        }
-}
-
-
-quantile_breaks <- function(xs, n = 10) {
-        breaks <- quantile(xs, probs = seq(0, 1, length.out = n))
-        breaks[!duplicated(breaks)]
-}
-mat_breaks <- quantile_breaks(table.fc, n = 11)
-
-table.fc = table.fc[,c("Endometrioma", "Endometriosis", "No endometriosis detected", "Eutopic Endometrium", "Unaffected ovary")]
-
-pheatmap(t(table.fc), 
-         display_numbers = signif(t(table.fc), 3),
-         color             = colorRampPalette(c("#81B8D5", "white", "#E37F65"))(10),
-         breaks            = mat_breaks,
-         cluster_rows      = F,
-         cluster_cols      = F,
-         fontsize          = 14)
-
-
-
-```
 
 
 

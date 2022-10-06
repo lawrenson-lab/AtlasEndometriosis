@@ -45,26 +45,7 @@ aux.seurat <- readRDS("rds/aux.seurat.rds")
 
 ```
 
-## Figure 2-A
-
-```{r include = T, eval=T, fig.align = 'center', fig.height=4, fig.width=13}
-
-p4 = DimPlot(aux.seurat, 
-             reduction = "umap", 
-             raster=FALSE, 
-             group.by = "Major.Class", 
-             pt.size = .1, 
-             split.by = 'Major.Class', 
-             cols = c("Endometrioma" = "#7b3294", 
-                      "Eutopic Endometrium" = "#c2a5cf", 
-                      "Endometriosis" = "#d9f0d3", 
-                      "No endometriosis detected" = "#a6dba0",
-                      "Unaffected ovary" = "#008837"))
-
-p4
-```
-
-## Figure 2-B
+## Extended Figure 1-a
 
 ```{r include = T, eval=T, fig.align = 'center', fig.width=12, fig.height=8}
 
