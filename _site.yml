@@ -20,9 +20,7 @@ navbar:
     - text: "Figure 6"
       href: figure6.html  
     - text: "Figure 7"
-      href: figure7.html  
-    - text: "Figure 8"
-      href: figure8.html  
+      href: figure7.html
     - text: "Extended Figure 1"
       href: extended_figure1.html  
     - text: "Extended Figure 2"

@@ -3,601 +3,448 @@ title: "Figure 7"
 knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
 
----
+--- 
+
 
 
 ```{r include = FALSE}
 rm(list = ls())
 
-library(ComplexHeatmap)
-library(circlize)
 library(Seurat)
-library(ggplot2)
-library(ggrepel)
-library(dplyr)
-library(plotly)
+library(MuSiC)
+library(reshape2)
+library(BisqueRNA)
+library(biomaRt)
+library(UpSetR)
+library(Biobase)
+library(pheatmap)
+library("GEOquery")
+require('hgu133plus2')
+unloadNamespace("monocle3")
 library(cowplot)
-library(tidyr)
-library(corrplot)
-library('org.Hs.eg.db')
-library(ReactomePA)
-library("AnnotationDbi")
-library("clusterProfiler")
-library(GGally)
-library("Runuran")
-library(tidyverse)
-
-options(ggrepel.max.overlaps = Inf) 
-```
-
-Load cohort annotation file and Epithelial cells Seurat object
-```{r include=F, eval=T}
-
-anno <- read.table("files/Endometriosis single cell cohort - Cohort.updated.Jan.06.2022.csv", sep = ",", header = TRUE, stringsAsFactors = F)
-anno = anno[!anno$Status == "Fail", 1:22]
-anno$Major.Class[anno$Major.Class == "Extra-ovarian endometriosis"] <- "Endometriosis"
-.anno = anno[!anno$Patient.No. == "",]
-.anno$SampleName[33:49] <- paste0(.anno$SampleName[33:49], "_", .anno$Index[33:49])
-.anno = .anno[1:49,]
-rownames(.anno) <- .anno$SampleName
-.anno$Major.Class[.anno$SampleName == "BEME228_A4"] <- "Endometriosis"
-.anno
-dim(.anno)
-
-
-classsification = read.delim("files/Endometriosis single cell cohort - CompareSurgical-rm-Endometrioma_updated_feb_02_22.csv", sep = ",", stringsAsFactors = F)
-classsification = classsification[classsification$Depth.KW == classsification$Depth.MS,]
-classsification = classsification[classsification$Pathologic.classification. != "No endometriosis detected",] 
-classsification = classsification[-which(classsification$SampleName == "BEME228_A5"),]
-
-
-anno.class = .anno[which(.anno$SampleName %in% classsification$SampleName),]
-anno.class = anno.class[-which(anno.class$SampleName %in% c("S19259_BC", "S19286_CF")),]
-anno.class$CominedSurgical = classsification$Depth.KW[match(anno.class$SampleName, classsification$SampleName)]
-anno.class[, c("Patient.No.", "SampleName", "CominedSurgical")]
-
-
-anno.class$CominedSurgical[anno.class$SampleName == "S19225_D"] <- "Deep"
-
-anno.class$Fibrosis[anno.class$SampleName == "S19286_AE"] <- "moderate"
-
-anno.class$CominedSurgical[anno.class$SampleName == "S19286_H"] <- "Deep"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME228_A4"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME228_A4"] <- "mild"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME228_A5"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME228_A5"] <- "mild"
-
-anno.class$CominedSurgical[anno.class$SampleName == "BEME209_B3"] <- "Superficial"
-anno.class$Hemorrhage[anno.class$SampleName == "BEME209_B3"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME209_B3"] <- "moderate"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME207_B7"] <- "mild"
-anno.class$Fibrosis[anno.class$SampleName == "BEME207_B7"] <- "moderate"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME013_C1"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME013_C1"] <- "moderate"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME008_C3"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME008_C3"] <- "mild"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME008_C4"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME008_C4"] <- "moderate"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME008_C6"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME008_C6"] <- "mild"
-
-anno.class$Hemorrhage[anno.class$SampleName == "BEME008_C7"] <- "none"
-anno.class$Fibrosis[anno.class$SampleName == "BEME008_C7"] <- "mild"
-
-levels(anno.class$Fibrosis) <- c(levels(anno.class$Fibrosis), "Yes", "No")
-anno.class$Fibrosis[which(anno.class$Fibrosis == "none")] <- "No"
-anno.class$Fibrosis[which(anno.class$Fibrosis != "No")] <- "Yes"
-
-levels(anno.class$Hemorrhage) <- c(levels(anno.class$Hemorrhage), "Yes", "No")
-anno.class$Hemorrhage[which(anno.class$Hemorrhage == "none")] <- "No"
-anno.class$Hemorrhage[which(anno.class$Hemorrhage != "No")] <- "Yes"
-
-rownames(anno.class) <- 1:nrow(anno.class)
-anno.class <- droplevels(anno.class)
-anno.class.obs = anno.class[,c("Patient.No.", "SampleName", "CominedSurgical", "Hemorrhage", "Fresh.Frozen", "Fibrosis")]
-
-.aux.seurat = readRDS("rds/deep.superficial.samples.cells.rds")
+library(ComplexHeatmap)
 
 ```
 
+Load Seurat object containing Endometrial-type epithelial cells
 
-```{r include = T, eval=T, fig.align = 'center', fig.asp=.99}
-.sc = readRDS(file = "rds/epithelial.annotated.rds")
+```{r include = T, eval=T, message=F, warning=F}
+sc = readRDS("rds/EnEpi_cells.rds")
+
+prop.cells = data.frame(table(sc@meta.data$active.cluster))
+prop.cells <- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title="Number of cells in each cell type", x ="Cell type", y = "Number of Cells")
+
+
+prop.cells = data.frame(table(sc@meta.data$Major.Class))
+prop.cells <- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title="", x ="Major class", y = "Number of Cells")
+
+sc.sel = subset(sc, subset = Major.Class %in% c("Endometrioma", "Eutopic Endometrium", "Endometriosis"))
+
+single.cell.expression.set <- SeuratToExpressionSet(sc.sel, delimiter='-', position=2, version="v3")
+phenoData(single.cell.expression.set) <- AnnotatedDataFrame(sc.sel@meta.data)
+
+
+prop.cells = data.frame(table(sc.sel@meta.data$active.cluster))
+prop.cells <- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title="Number of cells in each cell type", x ="Cell type", y = "Number of Cells")
+
+
+prop.cells = data.frame(table(sc.sel@meta.data$Major.Class))
+prop.cells <- prop.cells[order(prop.cells$Freq),]
+prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
+
+ggplot(prop.cells, aes(Var1, Freq)) +
+  geom_col() +
+  theme_minimal(base_size = 15) +
+  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()) +
+  labs(title="", x ="Major class", y = "Number of Cells")
+```
+
+
+
+## Figure 7-a Load GSE129617 expression data
+
+```{r include = T, eval=F, message=F, warning=F}
+
+ensembl <- useMart("ensembl", dataset="hsapiens_gene_ensembl")
+bm <- getBM(attributes=c('ensembl_gene_id', 'external_gene_name', 'gene_biotype', 'ensembl_transcript_id'), mart = ensembl)
+
+
+title = "25 CCOC"
+load("data/ccoc_GSE129617.expr_25_samples.rda")
+dim(GSE129617.expr)
+
+
+df <- data.frame(histotype = c(rep('CCOC', 25)))
+rownames(df) <- colnames(GSE129617.expr)
+# Heapmap 0: plot top variable genes
+matrix <- GSE129617.expr
+matrix <- matrix[!duplicated(rownames(matrix)) & rownames(matrix) %in% 
+                   bm$external_gene_name[!is.na(bm$gene_biotype) & 
+                                           bm$gene_biotype == 'protein_coding'],]
+sd <- apply(X = matrix, MARGIN = 1, FUN = sd)
+rank <- (length(sd) - rank(sd) + 1)
+select <- rank <= 500
+
+pheatmap(matrix[select,], cluster_rows=T, show_rownames=F, cluster_cols=T, annotation_col = df, 
+         main = paste0('GSE129617 - 25 CCOC Top ',sum(select),' protein coding genes (n=', nrow(matrix), ")"))
+
+matrix.eset = ExpressionSet(assayData=matrix, phenoData = new("AnnotatedDataFrame",data=df))
+```
+
+### Estimate cell type proportions
+
+```{r include = T, eval=F, message=F, warning=F}
+Est.prop = music_prop(bulk.eset = matrix.eset,
+                      sc.eset = single.cell.expression.set, 
+                      clusters = 'active.cluster',
+                      samples = 'SampleName',
+                      verbose = F)
+```
+
+```{r include = T, eval=T, message=F, warning=F}
+
+bp.esti.pro = read.delim("files/estimation.25-CCOC.decon.cvs", sep = ",")
+df <- data.frame(histotype = c(rep('CCOC', 25)))
+rownames(df) <- rownames(bp.esti.pro)
+
+bp.esti.pro = merge(bp.esti.pro, df, by=0)
+bp.esti.pro = bp.esti.pro[match(rownames(df), bp.esti.pro$Row.names), ]
 
 ```
 
-## 
-```{r include = T, eval=T, fig.align = 'center'}
+```{r include = T, eval=T, message=F, warning=F, fig.align='center', fig.width=5, fig.height=6}
 
-set.seed(123456)
-calc.dist <- function (anno.class, index, data.m.prob) {
-  PN = NULL
-  features = names(table(anno.class[[index]]))
-  
-  for (feat in features) {
-    names = anno.class$SampleName[which(anno.class[[index]] %in% feat)]
-    P = colMeans(t(data.m.prob[, which(colnames(data.m.prob) %in% names)]))
-    PN = rbind(PN, P)
-  }
-  rownames(PN) <- features
-  return(PN)
+collorder = c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9")
+
+ht_list = rowAnnotation(text = anno_text(bp.esti.pro$Row.names, location = unit(1, "npc"), just = "right", 
+                                         gp = gpar(fontsize = 12)))
+
+anno_width = unit(3, "cm")
+.cols = c(2: (ncol(bp.esti.pro)-1))
+
+ht_list = ht_list + rowAnnotation("dist_tss" = anno_barplot(bp.esti.pro[, .cols], bar_width = 1, gp = gpar(fill = collorder, fontsize = 14), 
+                                          width = anno_width), show_annotation_name = FALSE) +
+rowAnnotation(Histotype = anno_simple(bp.esti.pro$histotype), gp = gpar(fontsize = 20))
+
+draw(ht_list, heatmap_legend_list = Legend(title = "Epithelial clusters", labels = colnames(bp.esti.pro[, .cols]), legend_gp = gpar(fill = collorder)))
+
+
+```
+
+## Figure 7-b GSE73614 - OvTuCC = 24 OvTuEndo = 35
+
+```{r include = T, eval=F, message=F, warning=F}
+
+title = "GSE73614 - OvTuCC = 24 OvTuEndo = 35"
+
+five.word <- function(my.string){
+  elems = unlist(strsplit(as.character(my.string), " "))
+  elems[length(elems)]
 }
 
+GSE73614.anno.clinical <- read.delim("/media/Data01/public_data/CCOC/GSE73614/Sample_type.csv", sep = ",")
+
+GSE73614.anno.clinical$histotype <- sapply(GSE73614.anno.clinical$histotype, five.word)
+GSE73614.anno.clinical$histotype = gsub("Mayo", "", GSE73614.anno.clinical$histotype)
+
+
+GSE73614 <- getGEO('GSE73614',GSEMatrix=TRUE)
+GSE73614.expr <- exprs(GSE73614$GSE73614_series_matrix.txt.gz)
+head(GSE73614.expr)
+
+GSE73614.expr = read.table("/media/Data01/public_data/CCOC/GSE73614/GSE73614_RAW.tar")
+
+annot.BM <-  getBM(mart=ensembl,
+                   filters="agilent_wholegenome_4x44k_v2",
+                   attributes=c("agilent_wholegenome_4x44k_v2","external_gene_name","ensembl_gene_id","gene_biotype"),
+                   values=rownames(GSE73614.expr),
+                   uniqueRows=TRUE)
+head(annot.BM)
+
+common = match(rownames(GSE73614.expr), annot.BM$agilent_wholegenome_4x44k_v2)
+rownames(GSE73614.expr)[!is.na(common)] = annot.BM$external_gene_name[na.omit(common)]
+head(GSE73614.expr)
+
+
+df <- GSE73614.anno.clinical
+rownames(df) <- df$SampleName
+df = df[,-1, drop=F]
+
+matrix <- GSE73614.expr
+
+matrix = matrix[complete.cases(matrix),]
+delta1 = max(matrix, na.rm = T) - min(matrix, na.rm = T)
+delta2 = max(matrix, na.rm = T) - 0
+
+matrix = (matrix - min(matrix, na.rm = T)) * delta1 / delta2
+matrix[1:5, 1:4]
+
+matrix <- matrix[!duplicated(rownames(matrix)) & rownames(matrix) %in% 
+                   bm$external_gene_name[!is.na(bm$gene_biotype) & 
+                                           bm$gene_biotype == 'protein_coding'],]
+sd <- apply(X = matrix, MARGIN = 1, FUN = sd)
+rank <- (length(sd) - rank(sd) + 1)
+select <- rank <= 50
+
+df = df[df$histotype %in% c("OvTuEndo", "OvTuCC"), , drop=F]
+df = df[order(df$histotype), , drop=F]
+matrix = matrix[, match(rownames(df), colnames(matrix))]
+
+matrix = matrix[-which(rownames(matrix)==""),]
+matrix.eset = ExpressionSet(assayData=matrix, phenoData = new("AnnotatedDataFrame",data=df))
+
 ```
 
-## Figure 7-A
+### Estimate cell type proportions
 
-```{r include = T, eval=T, fig.width = 10, fig.asp = .62, message=F, warning=FALSE}
-
-
-aux = data.frame(table(.aux.seurat@meta.data$SampleName, .aux.seurat@meta.data$active.cluster))
-
-data.m = spread(aux, Var2, Freq)
-rownames(data.m) <- data.m$Var1
-data.m = t(data.m[, -1])
-data.m.prob = t(t(data.m) / colSums(data.m))
-
-data.plot = as.data.frame(t(data.m.prob))
-
-data.plot %>% ggpairs(upper = list(continuous = wrap("cor", family="sans", size=4)),
-                      lower = list(continuous = 'smooth')) +
-  theme_bw(base_size = 13) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank())
+```{r include = T, eval=F, message=F, warning=F}
+Est.prop = music_prop(bulk.eset = matrix.eset,
+                      sc.eset = single.cell.expression.set, 
+                      clusters = 'active.cluster',
+                      samples = 'SampleName',
+                      verbose = F)
 ```
 
-## Figure 7-B
-
-```{r include = T, eval=T, fig.align = 'center'}
-
-.aux.seurat@meta.data$Surgical = NA
-
-for (i in 1:nrow(anno.class)) {
-  sample = anno.class$SampleName[i]
-  .aux.seurat@meta.data$Surgical[.aux.seurat@meta.data$SampleName == sample] <- anno.class$CominedSurgical[i]
+```{r include = T, eval=T, message=F, warning=F}
+five.word <- function(my.string){
+  elems = unlist(strsplit(as.character(my.string), " "))
+  elems[length(elems)]
 }
 
-prop <- data.frame(table(.aux.seurat@meta.data$active.cluster, .aux.seurat@meta.data$Surgical))
-counts.prop.perc = group_by(prop, Var1) %>% mutate(percent = Freq/sum(Freq))
+bp.esti.pro = read.delim("files/estimation.GSE73614 - OvTuCC = 24 OvTuEndo = 35.cvs", sep = ",")
 
-bsize = 14
-aux = aggregate(prop$Freq, by=list(Category=prop$Var2), FUN=sum)
-aux$Var1 = "Total"
-colnames(aux) <- c("Var2", "Freq", "Var1")
-aux$percent = aux$Freq / sum(aux$Freq)
-counts.prop.perc = rbind(as.data.frame(counts.prop.perc), aux)
+GSE73614.anno.clinical <- read.delim("files/Sample_type.csv", sep = ",")
+GSE73614.anno.clinical$histotype <- sapply(GSE73614.anno.clinical$histotype, five.word)
+GSE73614.anno.clinical$histotype = gsub("Mayo", "", GSE73614.anno.clinical$histotype)
+df <- GSE73614.anno.clinical
+rownames(df) <- df$SampleName
+df = df[,-1, drop=F]
+df = df[df$histotype %in% c("OvTuEndo", "OvTuCC"), , drop=F]
+rownames(df) <- rownames(bp.esti.pro)
 
-p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = signif(round(percent, digits = 3), digits = 3))) + 
-  geom_bar(position="stack",stat = "identity", width=0.8) +
-  scale_fill_manual(name="Menstrual cycle", values = c("Deep" = "darkgreen", 
-                                                       "Superficial" = "brown")) +
-  geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
-  theme_set(theme_gray(base_size = bsize)) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 90, hjust = 1),
-        axis.text.y = element_text(angle = 0, hjust = 1),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "right")+
-  coord_flip()
-p1
+bp.esti.pro = merge(bp.esti.pro, df, by=0)
+bp.esti.pro = bp.esti.pro[match(rownames(df), bp.esti.pro$Row.names), ]
 
 ```
 
-## Figure 7-C
+```{r include = T, eval=T, message=F, warning=F, fig.align='center', fig.width=5, fig.height=10}
 
+collorder = c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9")
 
-```{r include = T, eval=T, message=F, warning=FALSE, fig.align = 'center', fig.width = 5, fig.height=6}
+ht_list = rowAnnotation(text = anno_text(bp.esti.pro$Row.names, location = unit(1, "npc"), just = "right", 
+                                         gp = gpar(fontsize = 12)))
 
+anno_width = unit(3, "cm")
+.cols = c(2: (ncol(bp.esti.pro)-1))
 
-anno.class = read.delim("files/random_samples_fqs_1000_annotation.updated.csv", sep = ",")
-data.m.prob = read.delim("files/random_samples_fqs_1000.updated.csv", sep = ",")
+ht_list = ht_list + rowAnnotation("dist_tss" = anno_barplot(bp.esti.pro[, .cols], bar_width = 1, gp = gpar(fill = collorder, fontsize = 14), 
+                                          width = anno_width), show_annotation_name = FALSE) +
+rowAnnotation(Histotype = anno_simple(bp.esti.pro$histotype), gp = gpar(fontsize = 20))
 
-nrand = 1000
-background.dist = NULL
+draw(ht_list, heatmap_legend_list = Legend(title = "Epithelial clusters", labels = colnames(bp.esti.pro[, .cols]), legend_gp = gpar(fill = collorder)))
 
-for (iter in 1:nrand) {
-  
-  var = "CominedSurgical"
-  anno.class.aux = anno.class[ sample( which( anno.class$CominedSurgical == "Superficial" ) , 8 ) , ]
-  anno.class.aux = rbind(anno.class.aux, anno.class[ sample( which( anno.class$CominedSurgical == "Deep" ) , 5 ) , ])
-  PN = calc.dist(anno.class = anno.class.aux, index = which(colnames(anno.class.aux) == "CominedSurgical"), data.m.prob = data.m.prob)
-  D.r = as.matrix(dist(PN, method = "euclidian"))
-  num = D.r[1,]
-  num = num[num > 0]
-  background.dist = rbind(background.dist, data.frame(Dist=num, Feature=var, Inter=iter, Class="Random"))
-  
-  var = "Hemorrhage"
-  anno.class.aux = anno.class[ sample( which( anno.class$Hemorrhage == "Yes" ) , 8 ) , ]
-  anno.class.aux = rbind(anno.class.aux, anno.class[ sample( which( anno.class$Hemorrhage == "No" ) , 5 ) , ])
-  PN = calc.dist(anno.class = anno.class.aux, index = which(colnames(anno.class.aux) == "Hemorrhage"), data.m.prob = data.m.prob)
-  D.r = as.matrix(dist(PN, method = "euclidian"))
-  num = D.r[1,]
-  num = num[num > 0]
-  background.dist = rbind(background.dist, data.frame(Dist=num, Feature=var, Inter=iter, Class="Random"))
-  
-  var = "Fibrosis"
-  anno.class.aux = anno.class[ sample( which( anno.class$Fibrosis == "Yes" ) , 9 ) , ]
-  anno.class.aux = rbind(anno.class.aux, anno.class[ sample( which( anno.class$Fibrosis == "No" ) , 4 ) , ])
-  PN = calc.dist(anno.class = anno.class.aux, index = which(colnames(anno.class.aux) == "Fibrosis"), data.m.prob = data.m.prob)
-  D.r = as.matrix(dist(PN, method = "euclidian"))
-  num = D.r[1,]
-  num = num[num > 0]
-  background.dist = rbind(background.dist, data.frame(Dist=num, Feature=var, Inter=iter, Class="Random"))
-  
-  
-}
+```
 
-# Observation
+## Figure 7-c GSE9899 - 20 Endometrioid
 
-table.eval = NULL
+```{r include = T, eval=F, message=F, warning=F}
+GSE9899.anno.clinical <- read.delim("/media/Data01/public_data/CCOC/GSE9899/GSE9899_clinical_anns.csv", sep = ",")
+GSE9899.anno.clinical = merge(GSE9899.anno.clinical, read.delim("/media/Data01/public_data/CCOC/GSE9899/AOCSID_GSM_IDs_clinical_anns.csv", sep = ","), by="AOCSID")
 
-var = "CominedSurgical"
-PN = calc.dist(anno.class = anno.class.obs, index = which(colnames(anno.class.obs) == "CominedSurgical"), data.m.prob = data.m.prob)
-D.r = as.matrix(dist(PN, method = "euclidian"))
-num = D.r[1,]
-num = num[num > 0]
-background.dist = rbind(background.dist, data.frame(Dist=num, Feature=var, Inter=iter, Class="Observation"))
+title = "GSE9899 - 20 Endometrioid"
 
-background.dist.sel = background.dist[background.dist$Class == "Random" & background.dist$Feature == var,]
-meand_rd = mean(background.dist.sel$Dist)
-sd_rd = sd(background.dist.sel$Dist)
-obs = num
-pval = pnorm(obs, mean = meand_rd, sd = sd_rd, lower.tail = F)
-df.row = data.frame(x=var, max=max(background.dist.sel$Dist), pval=pval)
-table.eval = rbind(table.eval, df.row)
+GSE9899 <- getGEO('GSE9899',GSEMatrix=TRUE)
+GSE9899.expr <- exprs(GSE9899$GSE9899_series_matrix.txt.gz)
+head(GSE9899.expr)
 
-var = "Hemorrhage"
-PN = calc.dist(anno.class = anno.class.obs, index = which(colnames(anno.class.obs) == "Hemorrhage"), data.m.prob = data.m.prob)
-D.r = as.matrix(dist(PN, method = "euclidian"))
-num = D.r[1,]
-num = num[num > 0]
-background.dist = rbind(background.dist, data.frame(Dist=num, Feature=var, Inter=iter, Class="Observation"))
+annot.BM <-  getBM(mart=ensembl,
+                   attributes=c("affy_hg_u133_plus_2", "ensembl_gene_id", "gene_biotype", "external_gene_name"),
+                   filter="affy_hg_u133_plus_2",
+                   values=rownames(GSE9899.expr),
+                   uniqueRows=TRUE)
 
-background.dist.sel = background.dist[background.dist$Class == "Random" & background.dist$Feature == var,]
-meand_rd = mean(background.dist.sel$Dist)
-sd_rd = sd(background.dist.sel$Dist)
-obs = num
-pval = pnorm(obs, mean = meand_rd, sd = sd_rd, lower.tail = F)
-df.row = data.frame(x=var, max=max(background.dist.sel$Dist), pval=pval)
-table.eval = rbind(table.eval, df.row)
+common = match(rownames(GSE9899.expr), annot.BM$affy_hg_u133_plus_2)
+rownames(GSE9899.expr)[!is.na(common)] = annot.BM$external_gene_name[na.omit(common)]
 
-var = "Fibrosis"
-PN = calc.dist(anno.class = anno.class.obs, index = which(colnames(anno.class.obs) == "Fibrosis"), data.m.prob = data.m.prob)
-D.r = as.matrix(dist(PN, method = "euclidian"))
-num = D.r[1,]
-num = num[num > 0]
-background.dist = rbind(background.dist, data.frame(Dist=num, Feature=var, Inter=iter, Class="Observation"))
+df <- GSE9899.anno.clinical
+rownames(df) <- df$GSMID
 
-background.dist.sel = background.dist[background.dist$Class == "Random" & background.dist$Feature == var,]
-meand_rd = mean(background.dist.sel$Dist)
-sd_rd = sd(background.dist.sel$Dist)
-obs = num
-pval = pnorm(obs, mean = meand_rd, sd = sd_rd, lower.tail = F)
-df.row = data.frame(x=var, max=max(background.dist$Dist), pval=pval)
-table.eval = rbind(table.eval, df.row)
+df <- df[order(df$Primary.Site),]
 
-p = ggplot() +
-  geom_boxplot(data = background.dist, 
-               aes(x = Feature, y= Dist), 
-               alpha=0.2, 
-               fill="#fcbba1",
-               color="grey") +
-  theme_bw(base_size = 15) +
-  coord_cartesian(ylim = c(0, 1)) +
-  geom_jitter(alpha = 0.25, width = 0.2) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  geom_point(data = background.dist[background.dist$Class == "Observation",],
-             aes(x=Feature, y=Dist),
-             color = "#99000d",
-             size=4) +
-  geom_text(data = table.eval, aes(x =  x, y = max, 
-                                   label = paste("pval =", signif(pval, 3))))
-p
+matrix <- GSE9899.expr[, df$GSMID]
+matrix <- matrix[complete.cases(matrix),]
+matrix <- matrix[!duplicated(rownames(matrix)) & rownames(matrix) %in%
+                   bm$external_gene_name[!is.na(bm$gene_biotype) &
+                                           bm$gene_biotype == 'protein_coding'],]
+sd <- apply(X = matrix, MARGIN = 1, FUN = sd)
+rank <- (length(sd) - rank(sd) + 1)
+select <- rank <= 50
+df = df[,-c(1, 7)]
+
+df = df[df$Subtype == "Endo", , drop=F]
+matrix = matrix[, which(colnames(matrix) %in% rownames(df))]
+
+df = df[,3, drop=F]
+colnames(df) <- "histotype"
+
+matrix = matrix[-which(rownames(matrix)==""),]
+matrix.eset = ExpressionSet(assayData=matrix, phenoData = new("AnnotatedDataFrame",data=df))
 
 
 ```
 
-## Figure 7-D
+### Estimate cell type proportions
 
-``` {r figure7D, include=T, warning=FALSE, message=F, fig.align = 'center', fig.width = 5, fig.height=6}
+```{r include = T, eval=F, message=F, warning=F}
+Est.prop = music_prop(bulk.eset = matrix.eset,
+                      sc.eset = single.cell.expression.set, 
+                      clusters = 'active.cluster',
+                      samples = 'SampleName',
+                      verbose = F)
+```
 
-anno.class = anno.class.obs
+```{r include = T, eval=T, message=F, warning=F}
 
-############
-class = "Endometrial-type Epithelium"
-sel.sc = readRDS("rds/EnEpi_cells.rds")
+bp.esti.pro = read.delim("files/estimation.GSE9899 - 20 Endometrioid.cvs", sep = ",")
+df <- data.frame(histotype = c(rep('EnOC', 20)))
+rownames(df) <- rownames(bp.esti.pro)
 
-prop.cells <- data.frame(table(sel.sc@meta.data$active.cluster))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-prop.cells <- data.frame(table(sel.sc@meta.data$Major.Class))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-
-.sel.sc = subset(sel.sc, subset = SampleName %in% unique(anno.class$SampleName))
-
-
-prop.cells <- data.frame(table(.sel.sc@meta.data$active.cluster))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-prop.cells <- data.frame(table(.sel.sc@meta.data$Major.Class))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-.sel.sc@meta.data$Surgical = NA
-
-for (i in 1:nrow(anno.class)) {
-  sample = anno.class$SampleName[i]
-  .sel.sc@meta.data$Surgical[.sel.sc@meta.data$SampleName == sample] <- anno.class$CominedSurgical[i]
-}
-
-
-Idents(object = .sel.sc) <- .sel.sc@meta.data$Surgical
-
-DEG.res <- FindAllMarkers(.sel.sc, test.use = "MAST")
-
-fc.p = 0.9
-pv.p = 0.05
-DEG.res$STATUS = "NOT.SIG"
-DEG.res[DEG.res$avg_log2FC < -fc.p & DEG.res$p_val_adj < pv.p, ]$STATUS = "Down"
-DEG.res[DEG.res$avg_log2FC > fc.p & DEG.res$p_val_adj < pv.p, ]$STATUS = "Up"
-
-feature = "Surgical"
-c = "Deep"
-
-markers.filt = DEG.res[DEG.res$cluster == c,]
-nDEG = nrow(markers.filt)
-genes = markers.filt$gene[markers.filt$cluster == c & markers.filt$STATUS != "NOT.SIG"]
-
-pv <- ggplot(markers.filt, aes(x = avg_log2FC, y = -log10(p_val_adj))) +
-  geom_point(aes(color = STATUS), cex = 1.45) +
-  scale_color_manual(values = c("darkgreen", "grey", "red")) +
-  ylim(0, 65) +
-  theme_bw(base_size = 15) + 
-  theme(legend.position = "bottom",
-        plot.title = element_text(hjust = 0.5)) +
-  geom_text_repel(
-    data          = subset(markers.filt, STATUS == "Up"),
-    aes(label = markers.filt$gene[which(markers.filt$gene %in% genes  & markers.filt$STATUS %in% "Up")]),
-    segment.size  = 0.4,
-    direction     = "y",
-    segment.color = "grey50",
-    hjust         = 0
-  ) +
-  geom_text_repel(
-    data          = subset(markers.filt, STATUS == "Down"),
-    aes(label = markers.filt$gene[which(markers.filt$gene %in% genes & markers.filt$STATUS %in% "Down")]),
-    segment.size  = 0.4,
-    direction     = "y",
-    segment.color = "grey50",
-    hjust         = 1
-  ) +
-  geom_hline(yintercept = -log10(pv.p), linetype="dotted", color = "black", size= 0.5) +
-  geom_vline(xintercept = -fc.p, linetype="dotted", color = "black", size= 0.5) +
-  geom_vline(xintercept = fc.p, linetype="dotted", color = "black", size= 0.5) +
-  labs(title = paste0(feature, " : ", c, " (n=", nDEG, ") FC: ", fc.p, " pval = ", pv.p))
-pv
+bp.esti.pro = merge(bp.esti.pro, df, by=0)
+bp.esti.pro = bp.esti.pro[match(rownames(df), bp.esti.pro$Row.names), ]
 
 ```
 
+```{r include = T, eval=T, message=F, warning=F, fig.align='center', fig.width=5, fig.height=5}
 
-## Figure 7-E
+collorder = c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9")
 
+ht_list = rowAnnotation(text = anno_text(bp.esti.pro$Row.names, location = unit(1, "npc"), just = "right", 
+                                         gp = gpar(fontsize = 12)))
 
-```{r figure7E, include=F, eval=T}
-gs.ephi <- lapply(unique(DEG.res$cluster), function(x) {
-  print(x)
-  
-  clu <- DEG.res[DEG.res$cluster == x,]
-  clu <- clu[clu$p_val_adj < 0.05 & clu$avg_log2FC > 0,]
-  
-  
-  symbols = clu$gene
-  IDs = mapIds(org.Hs.eg.db, symbols, 'ENTREZID', 'SYMBOL')
-  
-  return(IDs)
-  
-})
+anno_width = unit(3, "cm")
+.cols = c(2: (ncol(bp.esti.pro)-1))
 
-names(gs.ephi) <- as.character(unique(DEG.res$cluster))
-res <- compareCluster(gs.ephi, fun="enrichPathway")
+ht_list = ht_list + rowAnnotation("dist_tss" = anno_barplot(bp.esti.pro[, .cols], bar_width = 1, gp = gpar(fill = collorder, fontsize = 14), 
+                                          width = anno_width), show_annotation_name = FALSE) +
+rowAnnotation(Histotype = anno_simple(bp.esti.pro$histotype), gp = gpar(fontsize = 20))
 
-dp <- clusterProfiler::dotplot(res, showCategory=10) 
-```
-
-
-```{r figure7E-p2, include=T, warning=F, message=F, fig.width = 5, fig.height=10, fig.align='center'}
-res <- compareCluster(gs.ephi, fun="enrichPathway")
-
-dp + RotatedAxis()
-
-```
-
-
-## Figure 3-F
-
-``` {r include=T, warning=FALSE, message=F, fig.align = 'center', fig.width = 5, fig.height=6}
-
-class = "Endometrial-type Stroma"
-sel.sc = readRDS("rds/EnS_cells.rds")
-
-prop.cells <- data.frame(table(sel.sc@meta.data$active.cluster))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-prop.cells <- data.frame(table(sel.sc@meta.data$Major.Class))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-
-.sel.sc = subset(sel.sc, subset = SampleName %in% unique(anno.class$SampleName))
-
-prop.cells <- data.frame(table(.sel.sc@meta.data$active.cluster))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-prop.cells <- data.frame(table(.sel.sc@meta.data$Major.Class))
-prop.cells$Var1 <- factor(prop.cells$Var1, levels = prop.cells$Var1)
-ggplot(prop.cells, aes(Var1, Freq)) +
-  geom_col() +
-  theme_minimal(base_size = 15) +
-  geom_text(aes(label=Freq), position=position_dodge(width=0.9), vjust=-0.25) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank()) +
-  labs(y = "Number of Cells")
-
-.sel.sc@meta.data$Surgical = NA
-
-for (i in 1:nrow(anno.class)) {
-  sample = anno.class$SampleName[i]
-  .sel.sc@meta.data$Surgical[.sel.sc@meta.data$SampleName == sample] <- anno.class$CominedSurgical[i]
-}
-
-
-Idents(object = .sel.sc) <- .sel.sc@meta.data$Surgical
-
-DEG.res <- FindAllMarkers(.sel.sc, test.use = "MAST")
-
-fc.p = 1.1
-pv.p = 0.05
-DEG.res$STATUS = "NOT.SIG"
-DEG.res[DEG.res$avg_log2FC < -fc.p & DEG.res$p_val_adj < pv.p, ]$STATUS = "Down"
-DEG.res[DEG.res$avg_log2FC > fc.p & DEG.res$p_val_adj < pv.p, ]$STATUS = "Up"
-
-feature = "Surgical"
-c = "Deep"
-
-markers.filt = DEG.res[DEG.res$cluster == c,]
-nDEG = nrow(markers.filt)
-genes = markers.filt$gene[markers.filt$cluster == c & markers.filt$STATUS != "NOT.SIG"]
-
-pv <- ggplot(markers.filt, aes(x = avg_log2FC, y = -log10(p_val_adj))) +
-  geom_point(aes(color = STATUS), cex = 1.45) +
-  scale_color_manual(values = c("darkgreen", "grey", "red")) +
-  ylim(0, 65) +
-  theme_bw(base_size = 15) + 
-  theme(legend.position = "bottom",
-        plot.title = element_text(hjust = 0.5)) +
-  geom_text_repel(
-    data          = subset(markers.filt, STATUS == "Up"),
-    aes(label = markers.filt$gene[which(markers.filt$gene %in% genes  & markers.filt$STATUS %in% "Up")]),
-    segment.size  = 0.4,
-    direction     = "y",
-    segment.color = "grey50",
-    hjust         = 0
-  ) +
-  geom_text_repel(
-    data          = subset(markers.filt, STATUS == "Down"),
-    aes(label = markers.filt$gene[which(markers.filt$gene %in% genes & markers.filt$STATUS %in% "Down")]),
-    segment.size  = 0.4,
-    direction     = "y",
-    segment.color = "grey50",
-    hjust         = 1
-  ) +
-  geom_hline(yintercept = -log10(pv.p), linetype="dotted", color = "black", size= 0.5) +
-  geom_vline(xintercept = -fc.p, linetype="dotted", color = "black", size= 0.5) +
-  geom_vline(xintercept = fc.p, linetype="dotted", color = "black", size= 0.5) +
-  labs(title = paste0(feature, " : ", c, " (n=", nDEG, ") FC: ", fc.p, " pval = ", pv.p))
-pv
-
+draw(ht_list, heatmap_legend_list = Legend(title = "Epithelial clusters", labels = colnames(bp.esti.pro[, .cols]), legend_gp = gpar(fill = collorder)))
 
 ```
 
 
 
-```{r include=F, eval=T}
-gs.ephi <- lapply(unique(DEG.res$cluster), function(x) {
-  print(x)
-  
-  clu <- DEG.res[DEG.res$cluster == x,]
-  clu <- clu[clu$p_val_adj < 0.05 & clu$avg_log2FC > 0,]
-  
-  
-  symbols = clu$gene
-  IDs = mapIds(org.Hs.eg.db, symbols, 'ENTREZID', 'SYMBOL')
-  
-  return(IDs)
-  
-})
+### Figure 7-d 269 TCGA High-grade serous ovarian carcinoma
 
-names(gs.ephi) <- as.character(unique(DEG.res$cluster))
-res <- compareCluster(gs.ephi, fun="enrichPathway")
+```{r include = T, eval=F, message=F, warning=F}
 
-dp <- clusterProfiler::dotplot(res, showCategory=10) 
+title = "269 TCGA HGSOC"
+
+ucec.ID = subset(pd.mRNA.prim, cancer.type == "OV")
+dim(ucec.ID)
+
+UCEC.RNA <- TCGA.RNA[,c(1, which(colnames(TCGA.RNA) %in% ucec.ID$TCGAlong.id))]
+dim(UCEC.RNA)
+df <- data.frame(histotype = c(rep('HGSOC', 269)))
+colnames(UCEC.RNA) <- gsub("^(.*?-.*?-.*?)-.*", "\\1", colnames(UCEC.RNA))
+rownames(df) <- colnames(UCEC.RNA)[-1]
+
+# Heapmap 0: plot top variable genes
+matrix <- UCEC.RNA
+matrix <- matrix[!duplicated(TCGA.RNA$gene_symbol) & TCGA.RNA$gene_symbol %in%
+                   bm$external_gene_name[!is.na(bm$gene_biotype) &
+                                           bm$gene_biotype == 'protein_coding'],]
+matrix[1:4, 1:4]
+rownames(matrix) <- matrix$gene_symbol
+matrix = matrix[, -1]
+matrix = matrix[complete.cases(matrix),]
+
+sd <- apply(X = matrix, MARGIN = 1, FUN = sd)
+rank <- (length(sd) - rank(sd) + 1)
+select <- rank <= 500
+
+delta1 = max(matrix, na.rm = T) - min(matrix, na.rm = T)
+delta2 = max(matrix, na.rm = T) - 0
+matrix = (matrix - min(matrix, na.rm = T)) * delta1 / delta2
+
+pheatmap(log2(matrix[select,] + 1), cluster_rows=T, show_rownames=F, show_colnames = F, cluster_cols=T, annotation_col = df,
+         main = paste0(title, ' Top ',sum(select),' protein coding genes (n=', nrow(matrix), ")"))
+
+matrix.eset = new("ExpressionSet", exprs=as.matrix(matrix), phenoData = new("AnnotatedDataFrame",data=df))
 
 ```
 
-## Figure 3-G
+### Estimate cell type proportions
 
-```{r include=T, warning=F, message=F, fig.width = 5, fig.height=10, fig.align='center'}
-res <- compareCluster(gs.ephi, fun="enrichPathway")
-dp + RotatedAxis()
+```{r include = T, eval=F, message=F, warning=F}
+Est.prop = music_prop(bulk.eset = matrix.eset,
+                      sc.eset = single.cell.expression.set, 
+                      clusters = 'active.cluster',
+                      samples = 'SampleName',
+                      verbose = F)
+```
+
+
+```{r include = T, eval=T, message=F, warning=F}
+
+bp.esti.pro = read.delim("files/estimation.HGSOC.decon.cvs", sep = ",")
+df <- data.frame(histotype = c(rep('HGSOC', 269)))
+rownames(df) <- rownames(bp.esti.pro)
+
+bp.esti.pro = merge(bp.esti.pro, df, by=0)
+bp.esti.pro = bp.esti.pro[match(rownames(df), bp.esti.pro$Row.names), ]
 
 ```
 
+```{r include = T, eval=T, message=F, warning=F, fig.align='center', fig.width=5, fig.height=25}
+
+collorder = c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9")
+
+ht_list = rowAnnotation(text = anno_text(bp.esti.pro$Row.names, location = unit(1, "npc"), just = "right", 
+                                         gp = gpar(fontsize = 12)))
+
+anno_width = unit(3, "cm")
+.cols = c(2: (ncol(bp.esti.pro)-1))
+
+ht_list = ht_list + rowAnnotation("dist_tss" = anno_barplot(bp.esti.pro[, .cols], bar_width = 1, gp = gpar(fill = collorder, fontsize = 14), 
+                                          width = anno_width), show_annotation_name = FALSE) +
+rowAnnotation(Histotype = anno_simple(bp.esti.pro$histotype), gp = gpar(fontsize = 20))
+
+draw(ht_list, heatmap_legend_list = Legend(title = "Epithelial clusters", labels = colnames(bp.esti.pro[, .cols]), legend_gp = gpar(fill = collorder)))
+
+
+```
 

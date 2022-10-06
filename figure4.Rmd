@@ -27,7 +27,7 @@ library(ggrepel)
 ```
 Load cohort mutation information
 
-## Figure 4-A
+## Figure 4-a
 
 ```{r include = T, eval=T, fig.align='center', fig.height=10, fig.width=8.5}
 
@@ -64,7 +64,7 @@ ggplot(data.table.m, aes(x = variable, y = Case, color = as.factor(value))) +
 
 ```
 
-## Figure 4-D
+## Figure 4-d
 
 ```{r include = T, eval=T, fig.align='center'}
 
@@ -102,7 +102,7 @@ vp
 
 ```
 
-## Figure 4-E
+## Figure 4-e
 
 
 ```{r include = T, eval=T,  fig.align='center'}
@@ -140,6 +140,8 @@ vp
 
 
 ```
+
+## Figure 4-h
 
 Loading Seurat object and selecting Endothelial cells
 
@@ -228,7 +230,7 @@ p1
 
 ```
 
-## Figure 4-I
+## Figure 4-i
 
 
 ```{r include = T, eval=T,  fig.align='center', warning=F}
@@ -244,7 +246,7 @@ corrplot(test$residuals, is.cor = FALSE, method = 'color')
 
 ```
 
-## Figure 4-J
+## Figure 4-j
 
 ```{r include = T, eval=T,  fig.align='center'}
 

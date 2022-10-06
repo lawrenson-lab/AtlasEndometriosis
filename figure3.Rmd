@@ -59,13 +59,49 @@ levels(.sc@meta.data$active.cluster) <-c("SOX9+ LGR5+",
 
 ```
 
-## Figure 3-A
+## Figure 3-a
 ```{r include = T, eval=T, fig.align = 'center'}
 
 DimPlot(object = .sc, pt.size = 0.1, group.by ="active.cluster", label = F, raster=FALSE)
 ```
 
-## Figure 3-C
+## Figure 3-b
+
+```{r include = T, eval=T, fig.width = 10, fig.asp = .62, message=F, warning=FALSE}
+table.gene.markers <- data.frame(Gene=c("SERPINA5", "PAEP", "DPP4", "SPP1"), 
+                                       Cell="Secretory")
+table.gene.markers <- rbind(table.gene.markers,
+                            data.frame(Gene=c("ENPP3", "CREB3L1", "GNG11", "IHH"), 
+                                       Cell="Late Proliferative"))
+table.gene.markers <- rbind(table.gene.markers,
+                            data.frame(Gene=c("ESR1", "PGR", "TIMP1", "MMP7"), 
+                                       Cell="Early Proliferative"))
+table.gene.markers <- rbind(table.gene.markers,
+                            data.frame(Gene=c("THY1", "ACTA2"), 
+                                       Cell="Mesenchymal"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("WT1", "DES", "CALB2", "PDPN", "MSLN" ), 
+                                       Cell="Mesothelial"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("TPPP3", "PIFO", "FOXJ1"), 
+                                       Cell="Ciliated"))
+table.gene.markers <- rbind(table.gene.markers,
+                            data.frame(Gene=c("GDA", "FGFR2", "WNT7A", "FGF9", "LGR5", "PTGS1"),
+                                       Cell="Lumenal"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("EPCAM", "KRT7", "KRT8", "KRT10", "KRT18", "KRT19", "PAX8", "PAX2", "SPDEF"), 
+                                       Cell="Epithelial/Gynecologic"))
+table.gene.markers <- rbind(table.gene.markers, 
+                            data.frame(Gene=c("MUC5B", "TFF3", "HIF1A", "SOX9", "LGR5", "CD44"), 
+                                       Cell="Progenitors"))
+
+pd <- DotPlot(object = .sc, assay = "RNA", features = rev(unique(table.gene.markers$Gene)))+
+        theme(axis.text.x = element_text(angle = 90)) +
+        scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b") 
+pd
+```
+
+## Figure 3-c
 
 ```{r include = T, eval=T, fig.align = 'center'}
 prop.cells <- data.frame(table(Idents(.sc)))
@@ -111,41 +147,6 @@ p1
 
 ```
 
-## Figure 3-B
-
-```{r include = T, eval=T, fig.width = 10, fig.asp = .62, message=F, warning=FALSE}
-table.gene.markers <- data.frame(Gene=c("SERPINA5", "PAEP", "DPP4", "SPP1"), 
-                                       Cell="Secretory")
-table.gene.markers <- rbind(table.gene.markers,
-                            data.frame(Gene=c("ENPP3", "CREB3L1", "GNG11", "IHH"), 
-                                       Cell="Late Proliferative"))
-table.gene.markers <- rbind(table.gene.markers,
-                            data.frame(Gene=c("ESR1", "PGR", "TIMP1", "MMP7"), 
-                                       Cell="Early Proliferative"))
-table.gene.markers <- rbind(table.gene.markers,
-                            data.frame(Gene=c("THY1", "ACTA2"), 
-                                       Cell="Mesenchymal"))
-table.gene.markers <- rbind(table.gene.markers, 
-                            data.frame(Gene=c("WT1", "DES", "CALB2", "PDPN", "MSLN" ), 
-                                       Cell="Mesothelial"))
-table.gene.markers <- rbind(table.gene.markers, 
-                            data.frame(Gene=c("TPPP3", "PIFO", "FOXJ1"), 
-                                       Cell="Ciliated"))
-table.gene.markers <- rbind(table.gene.markers,
-                            data.frame(Gene=c("GDA", "FGFR2", "WNT7A", "FGF9", "LGR5", "PTGS1"),
-                                       Cell="Lumenal"))
-table.gene.markers <- rbind(table.gene.markers, 
-                            data.frame(Gene=c("EPCAM", "KRT7", "KRT8", "KRT10", "KRT18", "KRT19", "PAX8", "PAX2", "SPDEF"), 
-                                       Cell="Epithelial/Gynecologic"))
-table.gene.markers <- rbind(table.gene.markers, 
-                            data.frame(Gene=c("MUC5B", "TFF3", "HIF1A", "SOX9", "LGR5", "CD44"), 
-                                       Cell="Progenitors"))
-
-pd <- DotPlot(object = .sc, assay = "RNA", features = rev(unique(table.gene.markers$Gene)))+
-        theme(axis.text.x = element_text(angle = 90)) +
-        scale_colour_gradient2(low = "#2166ac", mid = "#f7f7f7", high = "#b2182b") 
-pd
-```
 
 
 ```{r include = F, eval=T, message=F, warning=FALSE}
@@ -220,7 +221,7 @@ for (i in 1:nrow(info.table)) {
 }
 ```
 
-## Figure 3-D
+## Figure 3-d
 
 ``` {r include=T, warning=FALSE, fig.align = 'center'}
 .sel.sc = subset(sel.sc, subset = Major.Class %in% c("Eutopic Endometrium"))
@@ -254,7 +255,7 @@ p1
 
 ```
 
-## Figure 3-E
+## Figure 3-e
 
 ``` {r include=T, warning=FALSE, fig.align = 'center'}
 .sel.sc = subset(sel.sc, subset = Major.Class %in% c("Endometrioma",
@@ -276,7 +277,7 @@ p1 <- ggplot(counts.prop.perc, aes(x = Var1, y = percent, fill = Var2, label = s
                                                              "Luteal" = "red"
                                                              )) +
         geom_text(position = position_stack(vjust = 0.5), size = 4, color = "#ffffff") +
-        theme_set(theme_gray(base_size = bsize)) +
+        theme_set(theme_classic(base_size = bsize)) +
         theme(plot.title = element_text(hjust = 0.5),
               axis.text.x = element_text(angle = 90, hjust = 1),
               axis.text.y = element_text(angle = 0, hjust = 1),
@@ -289,7 +290,7 @@ p1
 
 ```
 
-## Figure 3-F
+## Figure 3-f
 
 ```{r include = T, fig.align='center', message=F, warning=F, fig.width = 5, fig.height=8}
 
@@ -335,7 +336,7 @@ p <- clusterProfiler::dotplot(res, showCategory=10)
 
 ```
 
-## Figure 3-I
+## Figure 3-i
 
 ```{r include=T, warning=F, message=F, fig.width = 5, fig.height=10, fig.align='center'}
 res <- compareCluster(gs.epi, fun="enrichPathway")
@@ -383,7 +384,7 @@ ggplot(prop.cells, aes(Var1, Freq)) +
         labs(y = "Number of Cells")
 ```
 
-## Figure 3-G
+## Figure 3-g
 
 ```{r include=T, fig.align='center', message=F, warning=F, fig.width = 5, fig.height=8}
 
@@ -430,7 +431,7 @@ p <- clusterProfiler::dotplot(res, showCategory=10)
 
 ```
 
-## Figure 3-H
+## Figure 3-h
 
 ```{r include=T, warning=F, message=F, fig.width = 5, fig.height=10, fig.align='center'}
 res <- compareCluster(gs.epi, fun="enrichPathway")
