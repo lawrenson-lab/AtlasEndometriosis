@@ -8,6 +8,7 @@ knit: (function(inputFile, encoding) {
 
 This document contains code workflows, explaining how to perform the bioinformatics analysis described in ***Single-cell transcriptomic analysis of endometriosis***
 
+#### Summmary abstract
 A single-cell transcriptomic analysis of endometriosis, endometriomas, eutopic endometrial samples and uninvolved ovary tissues highlights cell populations characteristic of these tissue types. Transcriptional and cellular heterogeneity across tissues suggests novel therapeutic targets and biomarkers for this disease.
 
 #### Data files
