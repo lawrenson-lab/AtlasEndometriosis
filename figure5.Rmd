@@ -239,11 +239,11 @@ pd
 
 ```{r include=T, warning=F, message=F, fig.align='center'}
 
-info.table = data.frame(Patient=c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21), 
-                        Endo=c("Yes", "No", "Yes", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "No", "Yes", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes"),
-                        Menstrual.Cycle = c("Luteal", "Hormone", "Luteal", "Luteal", "Hormone", "Hormone", "Follicular", "Follicular", "Follicular",
+info.table = data.frame(Patient=c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21), 
+                        Endo=c("Yes", "Yes", "No", "Yes", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "No", "Yes", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes"),
+                      Menstrual.Cycle = c("Luteal", "Luteal", "Hormone", "Luteal", "Luteal", "Hormone", "Hormone", "Follicular", "Follicular", "Follicular",
                                             "Luteal", "Hormone", "Hormone", "Luteal", "Luteal", "Follicular", "Luteal", "Hormone", "Luteal", "Follicular", "Follicular"),
-                        Hormone=c("No", "Yes", "No", "No", "Yes", "Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "No", "No", "Yes", "No", "No", "No")
+                        Hormone=c("No", "No", "Yes", "No", "No", "Yes", "Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "No", "No", "Yes", "No", "No", "No")
 )
 grid.newpage()
 gridExtra::grid.table(info.table)
