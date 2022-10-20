@@ -10,6 +10,9 @@ This document contains code workflows, explaining how to perform the bioinformat
 
 A single-cell transcriptomic analysis of endometriosis, endometriomas, eutopic endometrial samples and uninvolved ovary tissues highlights cell populations characteristic of these tissue types. Transcriptional and cellular heterogeneity across tissues suggests novel therapeutic targets and biomarkers for this disease.
 
+#### Data files
+Processed files used in the figures can be download from the link below:
+https://cedars.box.com/s/1ks3eyzlpnjbrseefw3j4k7nx6p2ut02
 
 
 ### Authors
