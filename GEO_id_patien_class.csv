@@ -1,0 +1,50 @@
+Patient,ID,Major Class,Anatomic annotation,GEO_id
+1,Sample1,Endometrioma,Ovarian cyst (L),GSM6574509
+2,Sample2,Endometrioma,Ovarian cyst (L),GSM6634272
+2,Sample3,Endometrioma,Ovarian cyst (R),GSM6634273
+3,Sample4,Eutopic Endometrium,Endometrium,GSM6634274
+4,Sample5,Endometriosis,Anterior cul de sac,GSM6574510
+4,Sample6,Endometriosis,Posterior cul de sac,GSM6690474
+5,Sample7,Endometriosis,Posterior cul de sac,GSM6574511
+6,Sample8,Eutopic Endometrium,Endometrium,GSM6574512
+6,Sample9,Ovary,Ovary,GSM6574513
+7,Sample10,Endometriosis,Pelvic side wall (R & L),GSM6574514
+7,Sample11,Endometriosis,Anterior cul de sac,GSM6574515
+7,Sample12,Endometrioma,Ovarian cyst (R),GSM6574516
+7,Sample13,Endometriosis,Uterosacral ligament (L & R),GSM6574517
+8,Sample14,No endometriosis detected,Anterior cul de sac & Pelvic side wall (R),GSM6574518
+8,Sample15,Endometrioma,Ovarian cyst (L),GSM6574519
+8,Sample16,Endometriosis,Uterosacral ligament (L),GSM6574520
+8,Sample17,No endometriosis detected,Rectal Serosa,GSM6574521
+9,Sample18,Endometriosis,Pelvic side wall (R & L),GSM6574522
+9,Sample19,Endometriosis,Ovarian fossa (L),GSM6574523
+9,Sample20,Endometriosis,Alterior abdominal wall & Anterior pelvic cul de sac,GSM6574524
+9,Sample21,Endometrioma,Ovarian cyst (R),GSM6574525
+9,Sample22,Endometriosis,Perimetrium (R),GSM6574526
+9,Sample23,Endometriosis,Perirectal fat,GSM6574527
+10,Sample24,Eutopic Endometrium,Endometrium,GSM6574528
+10,Sample25,No endometriosis detected,Uterosacral ligament (L),GSM6574529
+10,Sample26,Endometriosis,Uterosacral ligament (R),GSM6574530
+10,Sample27,No endometriosis detected,Bladder,GSM6574531
+11,Sample28,Endometriosis,Pelvic side wall (L),GSM6574532
+11,Sample29,Endometrioma,Ovarian cyst (L),GSM6574533
+11,Sample30,Eutopic Endometrium,Endometrium,GSM6574534
+12,Sample31,Eutopic Endometrium,Endometrium,GSM6574535
+13,Sample32,Eutopic Endometrium,Endometrium,GSM6574536
+14,Sample33,Endometriosis,Endometriosis (R),GSM6574537
+14,Sample34,Ovary,Ovary (L),GSM6574538
+14,Sample35,Eutopic Endometrium,Endometrium,GSM6574539
+15,Sample36,Ovary,Ovary (R),GSM6574540
+16,Sample37,Endometriosis,Ovarian fossa (L),GSM6574541
+16,Sample38,Eutopic Endometrium,Endometrium,GSM6574542
+17,Sample39,Eutopic Endometrium,Endometrium,GSM6574543
+18,Sample40,Eutopic Endometrium,Endometrium,GSM6574544
+18,Sample41,Ovary,Ovary,GSM6574545
+19,Sample42,Endometrioma,Ovarian cyst (L),GSM6574546
+19,Sample43,Endometriosis,Ovarian fossa (R),GSM6574547
+20,Sample44,Endometriosis,Uterosacral ligament (L),GSM6574548
+21,Sample45,Endometriosis,Rectal Serosa,GSM6574549
+21,Sample46,Endometriosis,Ovarian fossa (L),GSM6574550
+21,Sample47,Endometriosis,Uterosacral ligament (R),GSM6574551
+21,Sample48,Endometriosis,Anterior cul de sac,GSM6574552
+21,Sample49,Endometriosis,Posterior uterus,GSM6574553
